@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,9 +40,14 @@ public class ComboManager : MonoBehaviour
     private ResourceManager resourceManager;
 
     [SerializeField]
-    private List<ComboData> combos = new List<ComboData>();
+    private List<ComboData> combos =
+        new List<ComboData>();
 
-    public void CheckCombos(BuildingInstance building)
+    public event Action<int, int, int, ResourceType, int>
+        OnComboTriggered;
+
+    public void CheckCombos(
+        BuildingInstance building)
     {
         if (building == null)
         {
@@ -155,6 +161,14 @@ public class ComboManager : MonoBehaviour
             combo.RewardAmount
         );
 
+        OnComboTriggered?.Invoke(
+            combo.ComboCode,
+            combo.BuildingCodeA,
+            combo.BuildingCodeB,
+            combo.RewardResource,
+            combo.RewardAmount
+        );
+
         Debug.Log(
             $"ÄÞº¸ ¹ßµ¿: " +
             $"{combo.ComboCode} / " +
@@ -163,7 +177,8 @@ public class ComboManager : MonoBehaviour
         );
     }
 
-    private string FormatAmount(int amount)
+    private string FormatAmount(
+        int amount)
     {
         if (amount > 0)
         {
