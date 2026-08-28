@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 // 타일의 위치를 저장
 public class Tile : MonoBehaviour
 {
