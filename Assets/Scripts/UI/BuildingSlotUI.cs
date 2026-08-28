@@ -19,6 +19,9 @@ public class BuildingSlotUI : MonoBehaviour
     [SerializeField]
     private TMP_Text buildingCodeText;
 
+    [SerializeField]
+    private TMP_Text buildingCountText;
+
     private Button button;
 
     private void Awake()
@@ -37,6 +40,12 @@ public class BuildingSlotUI : MonoBehaviour
         button.onClick.AddListener(
             SelectBuilding
         );
+
+        if (buildingPlacement != null)
+        {
+            buildingPlacement.OnBuildingCountChanged +=
+                HandleBuildingCountChanged;
+        }
     }
 
     private void Start()
@@ -51,6 +60,12 @@ public class BuildingSlotUI : MonoBehaviour
             button.onClick.RemoveListener(
                 SelectBuilding
             );
+        }
+
+        if (buildingPlacement != null)
+        {
+            buildingPlacement.OnBuildingCountChanged -=
+                HandleBuildingCountChanged;
         }
     }
 
@@ -113,6 +128,50 @@ public class BuildingSlotUI : MonoBehaviour
         {
             buildingCodeText.text =
                 building.BuildingCode.ToString();
+        }
+
+        if (buildingPlacement != null)
+        {
+            UpdateCountUI(
+                buildingPlacement.GetRemainingCount(
+                    buildingCode
+                )
+            );
+        }
+    }
+
+    private void HandleBuildingCountChanged(
+        int changedBuildingCode,
+        int remainingCount)
+    {
+        if (changedBuildingCode != buildingCode)
+        {
+            return;
+        }
+
+        UpdateCountUI(
+            remainingCount
+        );
+    }
+
+    private void UpdateCountUI(
+        int remainingCount)
+    {
+        if (buildingCountText != null)
+        {
+            int maxCount =
+                buildingPlacement.GetMaxCount(
+                    buildingCode
+                );
+
+            buildingCountText.text =
+                $"{remainingCount} / {maxCount}";
+        }
+
+        if (button != null)
+        {
+            button.interactable =
+                remainingCount > 0;
         }
     }
 }

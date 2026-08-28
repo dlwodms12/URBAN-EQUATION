@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,6 +26,8 @@ public class BuildingPlacement : MonoBehaviour
     private StageManager stageManager;
 
     private BuildingData selectedBuilding;
+
+    public event Action<int, int> OnBuildingCountChanged;
 
     private readonly Dictionary<int, int> buildingCounts =
         new Dictionary<int, int>
@@ -123,6 +126,16 @@ public class BuildingPlacement : MonoBehaviour
 
     private void PlaceBuilding(Tile tile)
     {
+        if (GetRemainingCount(selectedBuilding.BuildingCode) <= 0)
+        {
+            Debug.Log(
+                $"{selectedBuilding.BuildingName}은(는) " +
+                "더 이상 건설할 수 없습니다."
+            );
+
+            return;
+        }
+
         if (tile.IsOccupied)
         {
             Debug.Log("이미 건물이 존재하는 타일입니다.");
@@ -159,9 +172,15 @@ public class BuildingPlacement : MonoBehaviour
 
         tile.SetBuilding(building);
 
-        buildingCounts[
-            selectedBuilding.BuildingCode
-        ]--;
+        int buildingCode =
+            selectedBuilding.BuildingCode;
+
+        buildingCounts[buildingCode]--;
+
+        OnBuildingCountChanged?.Invoke(
+            buildingCode,
+            buildingCounts[buildingCode]
+        );
 
         resourceManager.ApplyBuildingResource(
             selectedBuilding
