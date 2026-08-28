@@ -88,10 +88,10 @@ public class ResourceManager : MonoBehaviour
     }
 
     public void Add(
-        ResourceType resourceType,
-        int amount)
+    ResourceType resourceType,
+    int amount)
     {
-        if (amount <= 0)
+        if (amount == 0)
         {
             return;
         }

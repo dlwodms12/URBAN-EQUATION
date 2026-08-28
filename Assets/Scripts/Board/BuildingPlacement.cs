@@ -17,6 +17,9 @@ public class BuildingPlacement : MonoBehaviour
     [SerializeField]
     private ResourceManager resourceManager;
 
+    [SerializeField]
+    private ComboManager comboManager;
+
     private BuildingData selectedBuilding;
 
     private void Update()
@@ -135,6 +138,10 @@ public class BuildingPlacement : MonoBehaviour
 
         resourceManager.ApplyBuildingResource(
             selectedBuilding
+        );
+
+        comboManager.CheckCombos(
+            building
         );
 
         Debug.Log(
