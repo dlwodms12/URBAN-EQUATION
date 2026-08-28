@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BuildingPlacement : MonoBehaviour
@@ -24,6 +25,15 @@ public class BuildingPlacement : MonoBehaviour
     private StageManager stageManager;
 
     private BuildingData selectedBuilding;
+
+    private readonly Dictionary<int, int> buildingCounts =
+        new Dictionary<int, int>
+        {
+            { 1001, 1 },
+            { 2001, 2 },
+            { 3001, 2 },
+            { 4001, 2 }
+        };
 
     private void Update()
     {
@@ -58,6 +68,16 @@ public class BuildingPlacement : MonoBehaviour
 
         if (building == null)
         {
+            return;
+        }
+
+        if (GetRemainingCount(buildingCode) <= 0)
+        {
+            Debug.Log(
+                $"{building.BuildingName}은(는) " +
+                "더 이상 건설할 수 없습니다."
+            );
+
             return;
         }
 
@@ -139,6 +159,10 @@ public class BuildingPlacement : MonoBehaviour
 
         tile.SetBuilding(building);
 
+        buildingCounts[
+            selectedBuilding.BuildingCode
+        ]--;
+
         resourceManager.ApplyBuildingResource(
             selectedBuilding
         );
@@ -154,5 +178,25 @@ public class BuildingPlacement : MonoBehaviour
             $"{selectedBuilding.BuildingCode} " +
             $"at {tile.Coordinate}"
         );
+    }
+
+    public int GetRemainingCount(int buildingCode)
+    {
+        if (!buildingCounts.ContainsKey(buildingCode))
+        {
+            return 0;
+        }
+
+        return buildingCounts[buildingCode];
+    }
+
+    public int GetMaxCount(int buildingCode)
+    {
+        if (!buildingCounts.ContainsKey(buildingCode))
+        {
+            return 0;
+        }
+
+        return buildingCounts[buildingCode];
     }
 }
