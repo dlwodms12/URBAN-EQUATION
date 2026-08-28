@@ -20,6 +20,9 @@ public class BuildingPlacement : MonoBehaviour
     [SerializeField]
     private ComboManager comboManager;
 
+    [SerializeField]
+    private StageManager stageManager;
+
     private BuildingData selectedBuilding;
 
     private void Update()
@@ -143,6 +146,8 @@ public class BuildingPlacement : MonoBehaviour
         comboManager.CheckCombos(
             building
         );
+
+        stageManager.CheckStageClear();
 
         Debug.Log(
             $"건물 배치: " +
