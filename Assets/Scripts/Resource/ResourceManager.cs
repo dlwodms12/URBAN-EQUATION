@@ -58,6 +58,7 @@ public class ResourceManager : MonoBehaviour
 
         return resources[resourceType];
     }
+
     // 건물 배치 가능 여부를 판단
     public bool CanConsume(
         ResourceType resourceType,
@@ -88,8 +89,8 @@ public class ResourceManager : MonoBehaviour
     }
 
     public void Add(
-    ResourceType resourceType,
-    int amount)
+        ResourceType resourceType,
+        int amount)
     {
         if (amount == 0)
         {
