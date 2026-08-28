@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class BuildingInstance : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public BuildingData Data { get; private set; }
 
-    // Update is called once per frame
-    void Update()
+    public Vector2Int Coordinate { get; private set; }
+
+    public void Initialize(
+        BuildingData data,
+        Vector2Int coordinate)
     {
-        
+        Data = data;
+        Coordinate = coordinate;
     }
 }
