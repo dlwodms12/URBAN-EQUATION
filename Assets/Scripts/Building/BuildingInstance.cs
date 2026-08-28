@@ -12,5 +12,8 @@ public class BuildingInstance : MonoBehaviour
     {
         Data = data;
         Coordinate = coordinate;
+
+        gameObject.name =
+            $"{data.BuildingCode}_{data.BuildingName}";
     }
 }
