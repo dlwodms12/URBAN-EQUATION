@@ -48,7 +48,7 @@ public class BuildingPlacement : MonoBehaviour
         }
     }
 
-    private void SelectBuilding(int buildingCode)
+    public void SelectBuilding(int buildingCode)
     {
         BuildingData building =
             buildingDatabase.GetBuilding(buildingCode);
