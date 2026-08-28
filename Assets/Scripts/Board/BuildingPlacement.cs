@@ -14,6 +14,9 @@ public class BuildingPlacement : MonoBehaviour
     [SerializeField]
     private BuildingInstance buildingPrefab;
 
+    [SerializeField]
+    private ResourceManager resourceManager;
+
     private BuildingData selectedBuilding;
 
     private void Update()
@@ -100,6 +103,19 @@ public class BuildingPlacement : MonoBehaviour
             return;
         }
 
+        if (!resourceManager.CanConsume(
+                selectedBuilding.ConsumeResource,
+                selectedBuilding.ConsumeAmount))
+        {
+            Debug.Log(
+                $"자원이 부족하여 " +
+                $"{selectedBuilding.BuildingName}을(를) " +
+                $"건설할 수 없습니다."
+            );
+
+            return;
+        }
+
         Vector3 position =
             tile.transform.position;
 
@@ -116,6 +132,10 @@ public class BuildingPlacement : MonoBehaviour
         );
 
         tile.SetBuilding(building);
+
+        resourceManager.ApplyBuildingResource(
+            selectedBuilding
+        );
 
         Debug.Log(
             $"건물 배치: " +
