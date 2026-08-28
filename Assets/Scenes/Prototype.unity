@@ -456,7 +456,7 @@ MonoBehaviour:
   buildingDatabase: {fileID: 1240239247}
   buildingPrefab: {fileID: 1387219748002981859, guid: 6172ce0af98ce244aa1284d7da74b378, type: 3}
   resourceManager: {fileID: 2081015867}
-  comboManager: {fileID: 0}
+  comboManager: {fileID: 1478086521}
 --- !u!4 &544795470
 Transform:
   m_ObjectHideFlags: 0
