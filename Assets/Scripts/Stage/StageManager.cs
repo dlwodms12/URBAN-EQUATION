@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class StageManager : MonoBehaviour
@@ -12,6 +13,8 @@ public class StageManager : MonoBehaviour
     {
         get { return isCleared; }
     }
+
+    public event Action OnStageCleared;
 
     private void Start()
     {
@@ -29,7 +32,9 @@ public class StageManager : MonoBehaviour
         }
 
         int population =
-            resourceManager.GetResource(ResourceType.Population);
+            resourceManager.GetResource(
+                ResourceType.Population
+            );
 
         if (population < 4)
         {
@@ -44,5 +49,7 @@ public class StageManager : MonoBehaviour
         isCleared = true;
 
         Debug.Log("Stage 1 Clear!");
+
+        OnStageCleared?.Invoke();
     }
 }

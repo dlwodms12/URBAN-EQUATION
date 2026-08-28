@@ -32,7 +32,7 @@ public class BuildingPlacement : MonoBehaviour
     private readonly Dictionary<int, int> buildingCounts =
         new Dictionary<int, int>
         {
-            { 1001, 1 },
+            { 1001, 2 },
             { 2001, 2 },
             { 3001, 2 },
             { 4001, 2 }
