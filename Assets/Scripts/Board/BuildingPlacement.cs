@@ -161,7 +161,7 @@ public class BuildingPlacement : MonoBehaviour
         BuildingInstance building =
             Instantiate(
                 buildingPrefab,
-                position + Vector3.up * 0.5f,
+                position,
                 Quaternion.identity
             );
 
