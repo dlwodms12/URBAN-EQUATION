@@ -1,4 +1,3 @@
-using Mono.Cecil;
 using UnityEngine;
 
 [CreateAssetMenu(
@@ -6,7 +5,7 @@ using UnityEngine;
     menuName = "Urban Equation/Building Data"
 )]
 
-//건물 데이터를 저장
+// 건물 데이터를 저장
 public class BuildingData : ScriptableObject
 {
     [Header("Building Information")]
@@ -15,6 +14,10 @@ public class BuildingData : ScriptableObject
 
     [SerializeField]
     private string buildingName;
+
+    [Header("Building Visual")]
+    [SerializeField]
+    private GameObject visualPrefab;
 
     [Header("Resource")]
     [SerializeField]
@@ -29,9 +32,12 @@ public class BuildingData : ScriptableObject
     [SerializeField]
     private int consumeAmount;
 
-    //외부 접근용 프로퍼티
+    // 외부 접근용 프로퍼티
     public int BuildingCode => buildingCode;
     public string BuildingName => buildingName;
+
+    // 건물 외형 프리팹
+    public GameObject VisualPrefab => visualPrefab;
 
     // ResourceManager에 정의되어 있는 ResourceType에 접근하기 위한 프로퍼티
     public ResourceType ProduceResource => produceResource;

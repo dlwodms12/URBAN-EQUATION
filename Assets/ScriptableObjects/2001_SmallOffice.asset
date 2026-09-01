@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingCode: 2001
   buildingName: "\uC18C\uD615 \uC0AC\uBB34\uC2E4"
+  visualPrefab: {fileID: 8664407419727344564, guid: d80f2a46cbb396249a31214f36357b86, type: 3}
   produceResource: 1
   produceAmount: 1
   consumeResource: 2

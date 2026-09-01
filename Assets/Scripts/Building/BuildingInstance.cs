@@ -2,13 +2,6 @@ using UnityEngine;
 
 public class BuildingInstance : MonoBehaviour
 {
-    [Header("Building Visuals")]
-    [SerializeField]
-    private GameObject housePrefab;
-
-    [SerializeField]
-    private GameObject buildingPrefab;
-
     public BuildingData Data { get; private set; }
 
     public Vector2Int Coordinate { get; private set; }
@@ -45,7 +38,8 @@ public class BuildingInstance : MonoBehaviour
             Destroy(currentVisual);
         }
 
-        GameObject visualPrefab = GetVisualPrefab();
+        GameObject visualPrefab =
+            Data.VisualPrefab;
 
         if (visualPrefab == null)
         {
@@ -67,30 +61,9 @@ public class BuildingInstance : MonoBehaviour
             Vector3.zero;
 
         currentVisual.transform.localRotation =
-            Quaternion.identity;
+            Quaternion.Euler(0f, 180f, 0f);
 
         currentVisual.transform.localScale =
             Vector3.one;
-    }
-
-    private GameObject GetVisualPrefab()
-    {
-        switch (Data.BuildingCode)
-        {
-            case 1001:
-                return housePrefab;
-
-            case 2001:
-                return buildingPrefab;
-
-            case 3001:
-                return housePrefab;
-
-            case 4001:
-                return buildingPrefab;
-
-            default:
-                return null;
-        }
     }
 }
