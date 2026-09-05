@@ -24,6 +24,16 @@ public class Tile : MonoBehaviour
         Building = building;
     }
 
+    public void SetHighlight(bool active)
+    {
+        if (highlight == null)
+        {
+            return;
+        }
+
+        highlight.SetActive(active);
+    }
+
     private void OnMouseEnter()
     {
         SetHighlight(true);
@@ -32,15 +42,5 @@ public class Tile : MonoBehaviour
     private void OnMouseExit()
     {
         SetHighlight(false);
-    }
-
-    private void SetHighlight(bool active)
-    {
-        if (highlight == null)
-        {
-            return;
-        }
-
-        highlight.SetActive(active);
     }
 }

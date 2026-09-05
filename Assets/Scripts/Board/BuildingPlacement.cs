@@ -27,6 +27,10 @@ public class BuildingPlacement : MonoBehaviour
 
     private BuildingData selectedBuilding;
 
+    private BuildingInstance previewBuilding;
+
+    private Tile currentTile;
+
     public event Action<int, int> OnBuildingCountChanged;
 
     private readonly Dictionary<int, int> buildingCounts =
@@ -41,7 +45,7 @@ public class BuildingPlacement : MonoBehaviour
     private void Update()
     {
         SelectBuildingWithKeyboard();
-        TryPlaceBuilding();
+        UpdateDragPreview();
     }
 
     private void SelectBuildingWithKeyboard()
@@ -93,6 +97,170 @@ public class BuildingPlacement : MonoBehaviour
         );
     }
 
+    private void UpdateDragPreview()
+    {
+        if (selectedBuilding == null)
+        {
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            CreatePreview();
+        }
+
+        if (previewBuilding != null)
+        {
+            UpdatePreviewPosition();
+            UpdateCurrentTile();
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            DestroyPreview();
+        }
+    }
+
+    private void CreatePreview()
+    {
+        if (previewBuilding != null)
+        {
+            return;
+        }
+
+        if (buildingPrefab == null)
+        {
+            Debug.LogError(
+                "BuildingPlacement에 " +
+                "BuildingPrefab이 연결되지 않았습니다."
+            );
+
+            return;
+        }
+
+        previewBuilding =
+            Instantiate(
+                buildingPrefab
+            );
+
+        previewBuilding.Initialize(
+            selectedBuilding,
+            Vector2Int.zero
+        );
+
+        SetPreviewMode(
+            previewBuilding.gameObject
+        );
+    }
+
+    private void UpdatePreviewPosition()
+    {
+        Ray ray =
+            mainCamera.ScreenPointToRay(
+                Input.mousePosition
+            );
+
+        Plane groundPlane =
+            new Plane(
+                Vector3.up,
+                Vector3.zero
+            );
+
+        if (!groundPlane.Raycast(
+                ray,
+                out float distance))
+        {
+            return;
+        }
+
+        Vector3 worldPosition =
+            ray.GetPoint(distance);
+
+        previewBuilding.transform.position =
+            worldPosition;
+    }
+
+    private void UpdateCurrentTile()
+    {
+        Ray ray =
+            mainCamera.ScreenPointToRay(
+                Input.mousePosition
+            );
+
+        if (!Physics.Raycast(
+                ray,
+                out RaycastHit hit))
+        {
+            ClearCurrentTile();
+
+            return;
+        }
+
+        Tile tile =
+            hit.collider.GetComponent<Tile>();
+
+        if (tile == null)
+        {
+            ClearCurrentTile();
+
+            return;
+        }
+
+        if (tile == currentTile)
+        {
+            return;
+        }
+
+        ClearCurrentTile();
+
+        currentTile = tile;
+
+        if (!currentTile.IsOccupied)
+        {
+            currentTile.SetHighlight(true);
+        }
+    }
+
+    private void ClearCurrentTile()
+    {
+        if (currentTile == null)
+        {
+            return;
+        }
+
+        currentTile.SetHighlight(false);
+
+        currentTile = null;
+    }
+
+    private void DestroyPreview()
+    {
+        ClearCurrentTile();
+
+        if (previewBuilding == null)
+        {
+            return;
+        }
+
+        Destroy(
+            previewBuilding.gameObject
+        );
+
+        previewBuilding = null;
+    }
+
+    private void SetPreviewMode(
+        GameObject previewObject)
+    {
+        Collider[] colliders =
+            previewObject.GetComponentsInChildren<Collider>();
+
+        foreach (Collider collider in colliders)
+        {
+            collider.enabled = false;
+        }
+    }
+
     private void TryPlaceBuilding()
     {
         if (selectedBuilding == null)
@@ -106,9 +274,13 @@ public class BuildingPlacement : MonoBehaviour
         }
 
         Ray ray =
-            mainCamera.ScreenPointToRay(Input.mousePosition);
+            mainCamera.ScreenPointToRay(
+                Input.mousePosition
+            );
 
-        if (!Physics.Raycast(ray, out RaycastHit hit))
+        if (!Physics.Raycast(
+                ray,
+                out RaycastHit hit))
         {
             return;
         }
@@ -126,7 +298,8 @@ public class BuildingPlacement : MonoBehaviour
 
     private void PlaceBuilding(Tile tile)
     {
-        if (GetRemainingCount(selectedBuilding.BuildingCode) <= 0)
+        if (GetRemainingCount(
+                selectedBuilding.BuildingCode) <= 0)
         {
             Debug.Log(
                 $"{selectedBuilding.BuildingName}은(는) " +
@@ -138,7 +311,10 @@ public class BuildingPlacement : MonoBehaviour
 
         if (tile.IsOccupied)
         {
-            Debug.Log("이미 건물이 존재하는 타일입니다.");
+            Debug.Log(
+                "이미 건물이 존재하는 타일입니다."
+            );
+
             return;
         }
 
@@ -170,7 +346,9 @@ public class BuildingPlacement : MonoBehaviour
             tile.Coordinate
         );
 
-        tile.SetBuilding(building);
+        tile.SetBuilding(
+            building
+        );
 
         int buildingCode =
             selectedBuilding.BuildingCode;
@@ -199,9 +377,11 @@ public class BuildingPlacement : MonoBehaviour
         );
     }
 
-    public int GetRemainingCount(int buildingCode)
+    public int GetRemainingCount(
+        int buildingCode)
     {
-        if (!buildingCounts.ContainsKey(buildingCode))
+        if (!buildingCounts.ContainsKey(
+                buildingCode))
         {
             return 0;
         }
@@ -209,9 +389,11 @@ public class BuildingPlacement : MonoBehaviour
         return buildingCounts[buildingCode];
     }
 
-    public int GetMaxCount(int buildingCode)
+    public int GetMaxCount(
+        int buildingCode)
     {
-        if (!buildingCounts.ContainsKey(buildingCode))
+        if (!buildingCounts.ContainsKey(
+                buildingCode))
         {
             return 0;
         }
