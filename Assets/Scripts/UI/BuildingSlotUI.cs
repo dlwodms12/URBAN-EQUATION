@@ -1,8 +1,11 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class BuildingSlotUI : MonoBehaviour
+public class BuildingSlotUI :
+    MonoBehaviour,
+    IPointerDownHandler
 {
     [SerializeField]
     private BuildingPlacement buildingPlacement;
@@ -37,10 +40,6 @@ public class BuildingSlotUI : MonoBehaviour
             return;
         }
 
-        button.onClick.AddListener(
-            SelectBuilding
-        );
-
         if (buildingPlacement != null)
         {
             buildingPlacement.OnBuildingCountChanged +=
@@ -55,13 +54,6 @@ public class BuildingSlotUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (button != null)
-        {
-            button.onClick.RemoveListener(
-                SelectBuilding
-            );
-        }
-
         if (buildingPlacement != null)
         {
             buildingPlacement.OnBuildingCountChanged -=
@@ -69,10 +61,11 @@ public class BuildingSlotUI : MonoBehaviour
         }
     }
 
-    private void SelectBuilding()
+    public void OnPointerDown(
+        PointerEventData eventData)
     {
         Debug.Log(
-            $"클릭된 슬롯: {gameObject.name} / " +
+            $"드래그 시작: {gameObject.name} / " +
             $"건물 코드: {buildingCode}"
         );
 
@@ -86,7 +79,7 @@ public class BuildingSlotUI : MonoBehaviour
             return;
         }
 
-        buildingPlacement.SelectBuilding(
+        buildingPlacement.StartBuildingDrag(
             buildingCode
         );
     }

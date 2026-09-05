@@ -97,18 +97,39 @@ public class BuildingPlacement : MonoBehaviour
         );
     }
 
-    private void UpdateDragPreview()
+    public void StartBuildingDrag(int buildingCode)
     {
-        if (selectedBuilding == null)
+        BuildingData building =
+            buildingDatabase.GetBuilding(buildingCode);
+
+        if (building == null)
         {
             return;
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (GetRemainingCount(buildingCode) <= 0)
         {
-            CreatePreview();
+            Debug.Log(
+                $"{building.BuildingName}은(는) " +
+                "더 이상 건설할 수 없습니다."
+            );
+
+            return;
         }
 
+        selectedBuilding = building;
+
+        Debug.Log(
+            $"드래그 시작: " +
+            $"{building.BuildingCode} / " +
+            $"{building.BuildingName}"
+        );
+
+        CreatePreview();
+    }
+
+    private void UpdateDragPreview()
+    {
         if (previewBuilding != null)
         {
             UpdatePreviewPosition();
