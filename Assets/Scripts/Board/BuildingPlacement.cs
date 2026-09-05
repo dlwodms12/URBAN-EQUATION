@@ -138,7 +138,7 @@ public class BuildingPlacement : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0))
         {
-            DestroyPreview();
+            FinishBuildingDrag();
         }
     }
 
@@ -268,6 +268,26 @@ public class BuildingPlacement : MonoBehaviour
         );
 
         previewBuilding = null;
+    }
+
+    private void FinishBuildingDrag()
+    {
+        if (previewBuilding == null)
+        {
+            return;
+        }
+
+        Tile targetTile = currentTile;
+
+        if (targetTile != null &&
+            !targetTile.IsOccupied)
+        {
+            PlaceBuilding(targetTile);
+        }
+
+        DestroyPreview();
+
+        selectedBuilding = null;
     }
 
     private void SetPreviewMode(
