@@ -44,57 +44,7 @@ public class BuildingPlacement : MonoBehaviour
 
     private void Update()
     {
-        SelectBuildingWithKeyboard();
         UpdateDragPreview();
-    }
-
-    private void SelectBuildingWithKeyboard()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            SelectBuilding(1001);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            SelectBuilding(2001);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            SelectBuilding(3001);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            SelectBuilding(4001);
-        }
-    }
-
-    public void SelectBuilding(int buildingCode)
-    {
-        BuildingData building =
-            buildingDatabase.GetBuilding(buildingCode);
-
-        if (building == null)
-        {
-            return;
-        }
-
-        if (GetRemainingCount(buildingCode) <= 0)
-        {
-            Debug.Log(
-                $"{building.BuildingName}은(는) " +
-                "더 이상 건설할 수 없습니다."
-            );
-
-            return;
-        }
-
-        selectedBuilding = building;
-
-        Debug.Log(
-            $"건물 선택: " +
-            $"{building.BuildingCode} / " +
-            $"{building.BuildingName}"
-        );
     }
 
     public void StartBuildingDrag(int buildingCode)
@@ -300,41 +250,6 @@ public class BuildingPlacement : MonoBehaviour
         {
             collider.enabled = false;
         }
-    }
-
-    private void TryPlaceBuilding()
-    {
-        if (selectedBuilding == null)
-        {
-            return;
-        }
-
-        if (!Input.GetMouseButtonDown(0))
-        {
-            return;
-        }
-
-        Ray ray =
-            mainCamera.ScreenPointToRay(
-                Input.mousePosition
-            );
-
-        if (!Physics.Raycast(
-                ray,
-                out RaycastHit hit))
-        {
-            return;
-        }
-
-        Tile tile =
-            hit.collider.GetComponent<Tile>();
-
-        if (tile == null)
-        {
-            return;
-        }
-
-        PlaceBuilding(tile);
     }
 
     private void PlaceBuilding(Tile tile)

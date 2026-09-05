@@ -63,7 +63,6 @@ public class BuildingInstance : MonoBehaviour
         currentVisual.transform.localRotation =
             Quaternion.Euler(0f, 180f, 0f);
 
-        currentVisual.transform.localScale =
-            Vector3.one;
+        //currentVisual.transform.localScale = Vector3.one;
     }
 }

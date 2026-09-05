@@ -33,14 +33,4 @@ public class Tile : MonoBehaviour
 
         highlight.SetActive(active);
     }
-
-    private void OnMouseEnter()
-    {
-        SetHighlight(true);
-    }
-
-    private void OnMouseExit()
-    {
-        SetHighlight(false);
-    }
 }
