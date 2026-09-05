@@ -45,6 +45,17 @@ public class ResourceManager : MonoBehaviour
         };
     }
 
+    public void ResetResources()
+    {
+        InitializeResources();
+
+        foreach (ResourceType resourceType in
+            System.Enum.GetValues(typeof(ResourceType)))
+        {
+            NotifyResourceChanged(resourceType);
+        }
+    }
+
     public int GetResource(ResourceType resourceType)
     {
         if (!resources.ContainsKey(resourceType))

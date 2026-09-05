@@ -33,6 +33,15 @@ public class BuildingPlacement : MonoBehaviour
 
     public event Action<int, int> OnBuildingCountChanged;
 
+    private readonly Dictionary<int, int> maxBuildingCounts =
+    new Dictionary<int, int>
+    {
+        { 1001, 2 },
+        { 2001, 2 },
+        { 3001, 2 },
+        { 4001, 2 }
+    };
+
     private readonly Dictionary<int, int> buildingCounts =
         new Dictionary<int, int>
         {
@@ -345,15 +354,31 @@ public class BuildingPlacement : MonoBehaviour
         return buildingCounts[buildingCode];
     }
 
-    public int GetMaxCount(
-        int buildingCode)
+    public int GetMaxCount(int buildingCode)
     {
-        if (!buildingCounts.ContainsKey(
-                buildingCode))
+        if (!maxBuildingCounts.ContainsKey(buildingCode))
         {
             return 0;
         }
 
-        return buildingCounts[buildingCode];
+        return maxBuildingCounts[buildingCode];
+    }
+
+    public void ResetBuildings()
+    {
+        foreach (int buildingCode in maxBuildingCounts.Keys)
+        {
+            buildingCounts[buildingCode] =
+                maxBuildingCounts[buildingCode];
+
+            OnBuildingCountChanged?.Invoke(
+                buildingCode,
+                buildingCounts[buildingCode]
+            );
+        }
+
+        selectedBuilding = null;
+
+        DestroyPreview();
     }
 }

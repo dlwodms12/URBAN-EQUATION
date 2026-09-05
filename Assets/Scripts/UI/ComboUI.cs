@@ -96,4 +96,18 @@ public class ComboUI : MonoBehaviour
                 return resourceType.ToString();
         }
     }
+
+    public void ResetUI()
+    {
+        if (displayCoroutine != null)
+        {
+            StopCoroutine(displayCoroutine);
+            displayCoroutine = null;
+        }
+
+        if (comboText != null)
+        {
+            comboText.gameObject.SetActive(false);
+        }
+    }
 }

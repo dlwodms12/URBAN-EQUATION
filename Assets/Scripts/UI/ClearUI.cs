@@ -58,4 +58,14 @@ public class ClearUI : MonoBehaviour
 
         Debug.Log("Clear UI Ãâ·Â");
     }
+
+    public void ResetUI()
+    {
+        if (clearText == null)
+        {
+            return;
+        }
+
+        clearText.gameObject.SetActive(false);
+    }
 }

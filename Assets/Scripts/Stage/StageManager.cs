@@ -52,4 +52,12 @@ public class StageManager : MonoBehaviour
 
         OnStageCleared?.Invoke();
     }
+
+    public void ResetStage()
+    {
+        isCleared = false;
+
+        Debug.Log("Stage 1 재시작");
+        Debug.Log("클리어 목표: 인구 수 4");
+    }
 }

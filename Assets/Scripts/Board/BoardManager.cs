@@ -47,4 +47,29 @@ public class BoardManager : MonoBehaviour
 
         return tiles[coordinate.x, coordinate.y];
     }
+
+    public void ResetBoard()
+    {
+        for (int y = 0; y < BoardSize; y++)
+        {
+            for (int x = 0; x < BoardSize; x++)
+            {
+                Tile tile = tiles[x, y];
+
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                if (tile.Building != null)
+                {
+                    Destroy(tile.Building.gameObject);
+                    tile.SetBuilding(null);
+                }
+
+                tile.SetHighlight(false);
+            }
+        }
+    }
 }
+
