@@ -12,6 +12,8 @@ public class BuildingHandManager : MonoBehaviour
 
     public IReadOnlyList<BuildingCardState> Cards => cards.AsReadOnly();
     public ResourceManager Resources => resourceManager;
+    public bool IsInitialized => initialized;
+    public long InitializationVersion { get; private set; }
     public event Action OnHandChanged;
     public event Action OnCardAvailabilityChanged;
 
@@ -53,6 +55,7 @@ public class BuildingHandManager : MonoBehaviour
         resourceManager = resources;
         initialCards = next.ToArray();
         initialized = true;
+        InitializationVersion++;
         cards.Clear();
         cards.AddRange(next);
         if (isActiveAndEnabled) Subscribe();
@@ -78,6 +81,17 @@ public class BuildingHandManager : MonoBehaviour
 
     public bool TryRestoreCards(IReadOnlyList<BuildingCardState> snapshot, out string error)
     {
+        if (!TryPrepareCardsRestore(snapshot, out Action apply, out Action publish, out error)) return false;
+        apply();
+        publish();
+        return true;
+    }
+
+    internal bool TryPrepareCardsRestore(IReadOnlyList<BuildingCardState> snapshot,
+        out Action apply, out Action publish, out string error)
+    {
+        apply = null;
+        publish = null;
         error = null;
         if (!initialized || snapshot == null)
         { error = "Card restore requires an initialized hand and a snapshot."; return false; }
@@ -90,9 +104,8 @@ public class BuildingHandManager : MonoBehaviour
             { error = "Snapshot contains an unknown, foreign, or duplicate card."; return false; }
             next.Add(card);
         }
-        cards.Clear();
-        cards.AddRange(next);
-        PublishHandChanged();
+        apply = () => { cards.Clear(); cards.AddRange(next); };
+        publish = PublishHandChanged;
         return true;
     }
 

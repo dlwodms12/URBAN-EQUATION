@@ -201,11 +201,24 @@ public class ResourceManager : MonoBehaviour
 
     public bool TryRestoreResources(IReadOnlyList<ResourceAmount> snapshot)
     {
+        if (!TryPrepareResourceRestore(snapshot, out Action apply, out Action publish)) return false;
+        apply();
+        publish();
+        return true;
+    }
+
+    internal bool TryPrepareResourceRestore(IReadOnlyList<ResourceAmount> snapshot,
+        out Action apply, out Action publish)
+    {
         EnsureInitialized();
+        apply = null;
+        publish = null;
         // A captured state may contain signed values from legacy Add.
         // Restore does not change the stage's retry baseline.
         if (!TryReadAmounts(snapshot, true, true, out var next)) return false;
-        CommitState(next, true);
+        Action notification = null;
+        apply = () => notification = CommitStateDeferred(next, true);
+        publish = () => notification?.Invoke();
         return true;
     }
 

@@ -8,6 +8,35 @@ public class StageManager : MonoBehaviour
     private ResourceManager resourceManager;
 
     private bool isCleared;
+    private StageProgressState progress = StageProgressState.Empty;
+    public ResourceManager Resources => resourceManager;
+    public event Action OnStateChanged;
+
+    public StageProgressState CaptureProgressState() => new StageProgressState(
+        isCleared, progress.GoalStates, progress.Rank, progress.NextStageAvailable);
+
+    public bool TryApplyProgressState(StageProgressState state)
+    {
+        if (!TryPrepareProgressRestore(state, out Action apply, out Action publish)) return false;
+        apply();
+        publish();
+        return true;
+    }
+
+    internal bool TryPrepareProgressRestore(StageProgressState state, out Action apply, out Action publish)
+    {
+        apply = null;
+        publish = null;
+        if (state == null) return false;
+        bool becameCleared = !isCleared && state.IsCleared;
+        apply = () => { progress = state; isCleared = state.IsCleared; };
+        publish = () =>
+        {
+            OnStateChanged?.Invoke();
+            if (becameCleared) OnStageCleared?.Invoke();
+        };
+        return true;
+    }
 
     public bool IsCleared
     {
@@ -19,9 +48,10 @@ public class StageManager : MonoBehaviour
     private void Start()
     {
         isCleared = false;
+        progress = StageProgressState.Empty;
 
-        Debug.Log("Stage 1 ½ÃÀÛ");
-        Debug.Log("Å¬¸®¾î ¸ñÇ¥: ÀÎ±¸ ¼ö 4");
+        Debug.Log("Stage 1 ì‹œì‘");
+        Debug.Log("í´ë¦¬ì–´ ëª©í‘œ: ì¸êµ¬ ìˆ˜ 4");
     }
 
     public void CheckStageClear()
@@ -47,6 +77,7 @@ public class StageManager : MonoBehaviour
     private void ClearStage()
     {
         isCleared = true;
+        OnStateChanged?.Invoke();
 
         Debug.Log("Stage 1 Clear!");
 
@@ -56,8 +87,10 @@ public class StageManager : MonoBehaviour
     public void ResetStage()
     {
         isCleared = false;
+        progress = StageProgressState.Empty;
+        OnStateChanged?.Invoke();
 
-        Debug.Log("Stage 1 Àç½ÃÀÛ");
-        Debug.Log("Å¬¸®¾î ¸ñÇ¥: ÀÎ±¸ ¼ö 4");
+        Debug.Log("Stage 1 ì¬ì‹œì‘");
+        Debug.Log("í´ë¦¬ì–´ ëª©í‘œ: ì¸êµ¬ ìˆ˜ 4");
     }
 }

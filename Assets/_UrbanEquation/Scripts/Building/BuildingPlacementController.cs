@@ -12,6 +12,7 @@ public class BuildingPlacementController : MonoBehaviour
     private int selectedCardId;
     private BuildingCardState selectedCard;
     private bool previewCanPlace;
+    private GameSessionManager subscribedSession;
 
     public bool IsDragging => preview != null;
     public int SelectedCardId => selectedCardId;
@@ -22,8 +23,10 @@ public class BuildingPlacementController : MonoBehaviour
     public void Configure(GameSessionManager gameSession, Camera camera)
     {
         CancelDrag();
+        UnsubscribeSession();
         session = gameSession;
         mainCamera = camera;
+        SubscribeSession();
     }
 
     public bool TryBeginDrag(int cardId)
@@ -133,7 +136,22 @@ public class BuildingPlacementController : MonoBehaviour
         selectedCard = null;
     }
 
-    private void OnDisable() => CancelDrag();
+    private void OnEnable() => SubscribeSession();
+    private void OnDisable() { UnsubscribeSession(); CancelDrag(); }
+
+    private void SubscribeSession()
+    {
+        if (subscribedSession == session) return;
+        UnsubscribeSession();
+        subscribedSession = session;
+        if (subscribedSession != null) subscribedSession.OnStateRestoring += CancelDrag;
+    }
+
+    private void UnsubscribeSession()
+    {
+        if (subscribedSession != null) subscribedSession.OnStateRestoring -= CancelDrag;
+        subscribedSession = null;
+    }
 
     private void SetTarget(Tile tile, bool canPlace)
     {

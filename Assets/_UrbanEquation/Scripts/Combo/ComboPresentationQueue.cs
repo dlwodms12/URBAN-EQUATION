@@ -28,9 +28,14 @@ public sealed class ComboPresentationQueue
 
     public void Clear()
     {
+        ClearSilently();
+        OnCurrentChanged?.Invoke(null);
+    }
+
+    internal void ClearSilently()
+    {
         waiting.Clear();
         Current = null;
-        OnCurrentChanged?.Invoke(null);
     }
 
     private void Advance()
@@ -39,4 +44,3 @@ public sealed class ComboPresentationQueue
         OnCurrentChanged?.Invoke(Current);
     }
 }
-
