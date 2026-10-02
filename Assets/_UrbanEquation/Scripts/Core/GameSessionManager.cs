@@ -22,6 +22,9 @@ public class GameSessionManager : MonoBehaviour
     public TurnHistoryManager History => turnHistory;
     public StageManager Stage => stageManager;
     public bool IsBusy => committing;
+    // Enabled by default so the existing Prototype does not require a flow manager.
+    public bool GameplayEnabled { get; private set; } = true;
+    public event Action OnGameplayStateChanged;
     public long ConfigurationVersion { get; private set; }
     public event Action OnStateRestoring;
     public event Action OnStateRestored;
@@ -29,6 +32,20 @@ public class GameSessionManager : MonoBehaviour
         = Array.AsReadOnly(new ComboResult[0]);
     public event Action<BuildingInstance, BuildingCardState> OnBuildingCommitted;
     public event Action<BuildingInstance, IReadOnlyList<ComboResult>> OnBuildResolved;
+
+    public bool TrySetGameplayEnabled(bool enabled, out string error)
+    {
+        error = null;
+        if (committing) { error = "Cannot change input during a session transaction."; return false; }
+        if (GameplayEnabled == enabled) return true;
+        GameplayEnabled = enabled;
+        OnGameplayStateChanged?.Invoke();
+        if (turnHistory != null) turnHistory.NotifyGameplayStateChanged();
+        if (stageManager != null) stageManager.NotifyGameplayStateChanged();
+        return true;
+    }
+
+    internal void ClearResolvedBuildResults() => LastComboResults = Array.AsReadOnly(new ComboResult[0]);
 
     public void ConfigureCombos(ComboManager manager)
     {
@@ -81,6 +98,7 @@ public class GameSessionManager : MonoBehaviour
 
     public bool CanBuild(int cardId, Vector2Int coordinate, out string error)
     {
+        if (!GameplayEnabled) { error = "Gameplay input is disabled for this screen."; return false; }
         if (committing) { error = "A building transaction is already in progress."; return false; }
         if (stageManager != null && !stageManager.CanUseWith(this, out error)) return false;
         if (stageManager != null) stageManager.BindSession(this);

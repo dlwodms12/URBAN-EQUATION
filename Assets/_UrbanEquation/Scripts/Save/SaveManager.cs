@@ -13,6 +13,7 @@ public class SaveManager : MonoBehaviour
     public ProgressSaveData Progress { get; private set; }
     public StageResult PendingResult { get; private set; }
     public bool IsConfigured => store != null;
+    public bool IsBusy => busy;
     public bool IsLoaded { get; private set; }
     public bool HasProgress { get; private set; }
     public bool CanContinue => IsLoaded && !loadBlocked && HasProgress;

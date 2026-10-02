@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// Main game NEXT STAGE confirms a result. Scene navigation is handled by later flow code.
+// Main game NEXT STAGE confirms a result; SceneFlowManager opens the clear screen.
 public class NextStageButtonUI : MonoBehaviour
 {
     [SerializeField] private StageManager stage;
@@ -43,7 +43,8 @@ public class NextStageButtonUI : MonoBehaviour
 
     private void Refresh()
     {
-        if (nextButton != null) nextButton.interactable = stage != null && stage.NextStageAvailable;
+        if (nextButton != null) nextButton.interactable = stage != null
+            && stage.GameplayEnabled && stage.NextStageAvailable;
     }
 
     private void CompleteStage()
