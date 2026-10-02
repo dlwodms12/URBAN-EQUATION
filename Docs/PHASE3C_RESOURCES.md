@@ -5,7 +5,9 @@
 5종 자원을 단일 ResourceManager에서 관리하고 건물의 복수 요구/획득 자원, 콤보 보상,
 카드 활성화에 사용할 조회, StageData 초기값, 후속 Undo용 자원 복원을 제공합니다.
 Phase 3-B는 사용자의 전체 EditMode 17개 통과 및 기존 Prototype 확인으로 완료했습니다.
-3-C 코드와 새 EditMode 테스트 14개를 작성했고, Unity 실행 검증은 대기입니다.
+3-C 코드와 새 EditMode 테스트 14개를 작성했습니다.
+2026-10-03 사용자가 전체 테스트 및 기존 Prototype 정상 작동을 확인하여 3-C를 완료 처리했습니다.
+이후 작업과 최신 검증 경계는 Docs/DEVELOPMENT_ROADMAP.md를 따릅니다.
 
 ## 파일 처리
 
@@ -79,4 +81,3 @@ Unity를 종료하고 codex/phase3c-resources 브랜치의 최신 변경을 받�
 Console 컴파일 오류 없음, Test Runner의 EditMode 전체 31개 통과를 확인합니다.
 기존 Prototype에서 건설/자원 차감·획득/콤보/Reset 동작과 Console을 확인합니다.
 새 테스트는 런타임 데이터 fixture를 생성하므로 Inspector의 새 asset 연결은 필요하지 않습니다.
-

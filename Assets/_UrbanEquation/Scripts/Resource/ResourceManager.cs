@@ -108,9 +108,18 @@ public class ResourceManager : MonoBehaviour
 
     public bool TryApplyBuildingResources(BuildingData building)
     {
+        if (!TryApplyBuildingResourcesDeferred(building, out Action publish)) return false;
+        publish();
+        return true;
+    }
+
+    // The session finishes tile/card/visual state before publishing resource events.
+    internal bool TryApplyBuildingResourcesDeferred(BuildingData building, out Action publish)
+    {
+        publish = null;
         if (building == null || !TryPrepareChange(building.RequiredResources,
             building.GainedResources, false, out var next)) return false;
-        CommitState(next, false);
+        publish = CommitStateDeferred(next, false);
         return true;
     }
 
@@ -208,15 +217,23 @@ public class ResourceManager : MonoBehaviour
 
     private void CommitState(Dictionary<ResourceType, int> next, bool notifyAll)
     {
+        CommitStateDeferred(next, notifyAll)();
+    }
+
+    private Action CommitStateDeferred(Dictionary<ResourceType, int> next, bool notifyAll)
+    {
         var changed = new List<ResourceType>();
         foreach (ResourceType type in ResourceTypes)
             if (notifyAll || resources[type] != next[type]) changed.Add(type);
 
         // Publish only after all five resource values have been committed.
         resources = next;
-        if (changed.Count == 0) return;
-        foreach (ResourceType type in changed)
-            OnResourceChanged?.Invoke(type, next[type]);
-        OnResourcesChanged?.Invoke();
+        return () =>
+        {
+            if (changed.Count == 0) return;
+            foreach (ResourceType type in changed)
+                OnResourceChanged?.Invoke(type, next[type]);
+            OnResourcesChanged?.Invoke();
+        };
     }
 }
