@@ -19,9 +19,11 @@ public class StageManager : MonoBehaviour
     public BuildingHandManager Hand => buildingHand;
     public StageData CurrentStage => configured ? stageData : null;
     public bool IsConfigured => configured;
+    public bool IsBusy => changing;
     public bool IsCleared => isCleared;
     public int Rank => progress.Rank;
     public bool NextStageAvailable => progress.NextStageAvailable;
+    public bool GameplayEnabled => ownerSession == null || ownerSession.GameplayEnabled;
     public IReadOnlyList<bool> GoalStates => progress.GoalStates;
     public StageResult CurrentResult { get; private set; }
     public long ConfigurationVersion { get; private set; }
@@ -29,6 +31,7 @@ public class StageManager : MonoBehaviour
     public event Action OnConfigurationChanged;
     public event Action OnStageCleared;
     public event Action<StageResult> OnStageCompleted;
+    internal void NotifyGameplayStateChanged() => OnStateChanged?.Invoke();
 
     public StageProgressState CaptureProgressState() => new StageProgressState(
         isCleared, progress.GoalStates, progress.Rank, progress.NextStageAvailable);
@@ -112,6 +115,8 @@ public class StageManager : MonoBehaviour
         error = null;
         if (!configured || changing || (ownerSession != null && ownerSession.IsBusy))
         { error = "Completion requires an idle, configured stage."; return false; }
+        if (!GameplayEnabled)
+        { error = "Completion is disabled for this screen."; return false; }
         if (isCleared) { result = CurrentResult; return result != null; }
         if (!TryEvaluateContext(stageData, boardManager, resourceManager, buildingHand,
             out StageProgressState latest, out error)) return false;

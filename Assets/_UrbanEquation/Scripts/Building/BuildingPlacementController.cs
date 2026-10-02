@@ -31,7 +31,8 @@ public class BuildingPlacementController : MonoBehaviour
 
     public bool TryBeginDrag(int cardId)
     {
-        if (session == null || session.Hand == null || session.BuildingPrefab == null
+        if (session == null || !session.GameplayEnabled || session.IsBusy
+            || session.Hand == null || session.BuildingPrefab == null
             || !session.Hand.IsCardAvailable(cardId)
             || !session.Hand.TryGetCard(cardId, out BuildingCardState card)
             || card.Building.VisualPrefab == null) return false;
@@ -74,7 +75,8 @@ public class BuildingPlacementController : MonoBehaviour
     {
         pointerPosition = screenPosition;
         if (!IsDragging) return;
-        if (session == null || session.Hand == null || !session.Hand.IsCardAvailable(selectedCardId)
+        if (session == null || !session.GameplayEnabled || session.Hand == null
+            || !session.Hand.IsCardAvailable(selectedCardId)
             || !session.Hand.TryGetCard(selectedCardId, out BuildingCardState card) || card != selectedCard)
         { CancelDrag(); return; }
         Tile target = null;
@@ -144,13 +146,26 @@ public class BuildingPlacementController : MonoBehaviour
         if (subscribedSession == session) return;
         UnsubscribeSession();
         subscribedSession = session;
-        if (subscribedSession != null) subscribedSession.OnStateRestoring += CancelDrag;
+        if (subscribedSession != null)
+        {
+            subscribedSession.OnStateRestoring += CancelDrag;
+            subscribedSession.OnGameplayStateChanged += HandleGameplayStateChanged;
+        }
     }
 
     private void UnsubscribeSession()
     {
-        if (subscribedSession != null) subscribedSession.OnStateRestoring -= CancelDrag;
+        if (subscribedSession != null)
+        {
+            subscribedSession.OnStateRestoring -= CancelDrag;
+            subscribedSession.OnGameplayStateChanged -= HandleGameplayStateChanged;
+        }
         subscribedSession = null;
+    }
+
+    private void HandleGameplayStateChanged()
+    {
+        if (session == null || !session.GameplayEnabled) CancelDrag();
     }
 
     private void SetTarget(Tile tile, bool canPlace)

@@ -22,7 +22,8 @@ public class TurnHistoryManager : MonoBehaviour
 
     public GameSessionManager Session => session;
     public int Count { get { EnsureScope(); return snapshots.Count; } }
-    public bool CanUndo { get { EnsureScope(); return configured && snapshots.Count > 1; } }
+    public bool CanUndo { get { EnsureScope(); return configured && session != null
+        && session.GameplayEnabled && snapshots.Count > 1; } }
     public GameStateSnapshot CurrentSnapshot
         { get { EnsureScope(); return snapshots.Count == 0 ? null : snapshots[snapshots.Count - 1]; } }
     public IReadOnlyList<GameStateSnapshot> Snapshots { get { EnsureScope(); return snapshots.AsReadOnly(); } }
@@ -63,6 +64,8 @@ public class TurnHistoryManager : MonoBehaviour
         error = null;
         if (!configured || restoring || session == null || session.IsBusy)
         { error = "Undo requires an idle, configured session."; return false; }
+        if (!session.GameplayEnabled)
+        { error = "Undo is disabled for this screen."; return false; }
         if (snapshots.Count < 2)
         { error = "There is no earlier completed turn. The first build cannot be undone."; return false; }
         if (!ValidateConnections(session, stageManager, out error)) return false;
@@ -121,6 +124,7 @@ public class TurnHistoryManager : MonoBehaviour
     }
 
     internal void NotifyConfigurationChanged() => EnsureScope();
+    internal void NotifyGameplayStateChanged() => OnHistoryChanged?.Invoke();
 
     private static bool ValidateConnections(GameSessionManager gameSession, StageManager stage, out string error)
     {
