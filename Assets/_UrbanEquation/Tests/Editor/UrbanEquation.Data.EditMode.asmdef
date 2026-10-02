@@ -1,0 +1,6 @@
+{
+    "name": "UrbanEquation.Data.EditMode",
+    "references": [],
+    "includePlatforms": ["Editor"],
+    "optionalUnityReferences": ["TestAssemblies"]
+}

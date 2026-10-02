@@ -81,16 +81,16 @@ public class ComboUI : MonoBehaviour
         switch (resourceType)
         {
             case ResourceType.Population:
-                return "ÀÎ±¸";
+                return "Ã€ÃÂ±Â¸";
 
             case ResourceType.Jobs:
-                return "ÀÏÀÚ¸®";
+                return "Ã€ÃÃ€ÃšÂ¸Â®";
 
-            case ResourceType.Goods:
-                return "ÀçÈ­";
+            case ResourceType.Money:
+                return "Ã€Ã§ÃˆÂ­";
 
             case ResourceType.Logistics:
-                return "¹°·ù";
+                return "Â¹Â°Â·Ã¹";
 
             default:
                 return resourceType.ToString();

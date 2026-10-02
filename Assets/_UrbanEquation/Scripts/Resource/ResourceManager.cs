@@ -2,14 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ResourceType
-{
-    Population,
-    Jobs,
-    Goods,
-    Logistics
-}
-
 public class ResourceManager : MonoBehaviour
 {
     [Header("Initial Resources")]
@@ -24,6 +16,9 @@ public class ResourceManager : MonoBehaviour
 
     [SerializeField]
     private int initialLogistics = 2;
+
+    [SerializeField]
+    private int initialTourism = 0;
 
     private Dictionary<ResourceType, int> resources;
 
@@ -40,8 +35,9 @@ public class ResourceManager : MonoBehaviour
         {
             { ResourceType.Population, initialPopulation },
             { ResourceType.Jobs, initialJobs },
-            { ResourceType.Goods, initialGoods },
-            { ResourceType.Logistics, initialLogistics }
+            { ResourceType.Money, initialGoods },
+            { ResourceType.Logistics, initialLogistics },
+            { ResourceType.Tourism, initialTourism }
         };
     }
 
@@ -61,7 +57,7 @@ public class ResourceManager : MonoBehaviour
         if (!resources.ContainsKey(resourceType))
         {
             Debug.LogWarning(
-                $"Á¸ÀçÇÏÁö ¾Ê´Â ÀÚ¿øÀÔ´Ï´Ù: {resourceType}"
+                $"ì¡´ì¬í•˜ì§€ ì•ŠëŠ” ìì›ì…ë‹ˆë‹¤: {resourceType}"
             );
 
             return 0;
@@ -70,7 +66,7 @@ public class ResourceManager : MonoBehaviour
         return resources[resourceType];
     }
 
-    // °Ç¹° ¹èÄ¡ °¡´É ¿©ºÎ¸¦ ÆÇ´Ü
+    // ê±´ë¬¼ ë°°ì¹˜ ê°€ëŠ¥ ì—¬ë¶€ë¥¼ íŒë‹¨
     public bool CanConsume(
         ResourceType resourceType,
         int amount)
@@ -122,7 +118,7 @@ public class ResourceManager : MonoBehaviour
         );
     }
 
-    // °Ç¹° ¹èÄ¡ ½Ã ÀÚ¿ø ¼Òºñ ¹× »ı»êÀ» Àû¿ëÇÏ´Â ¸Ş¼­µå
+    // ê±´ë¬¼ ë°°ì¹˜ ì‹œ ìì› ì†Œë¹„ ë° ìƒì‚°ì„ ì ìš©í•˜ëŠ” ë©”ì„œë“œ
     public void ApplyBuildingResource(
         BuildingData buildingData)
     {

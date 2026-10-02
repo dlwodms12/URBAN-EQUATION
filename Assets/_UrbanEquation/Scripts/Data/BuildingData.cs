@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(
@@ -5,7 +7,7 @@ using UnityEngine;
     menuName = "Urban Equation/Building Data"
 )]
 
-// °Ç¹° µ¥ÀÌÅÍ¸¦ ÀúÀå
+// ê±´ë¬¼ ë°ì´í„°ë¥¼ ì €ìž¥
 public class BuildingData : ScriptableObject
 {
     [Header("Building Information")]
@@ -18,6 +20,17 @@ public class BuildingData : ScriptableObject
     [Header("Building Visual")]
     [SerializeField]
     private GameObject visualPrefab;
+
+    [SerializeField] private Sprite cardImage;
+
+    [Header("Production Data")]
+    [Tooltip("Enable for new design data. Leave disabled for the four prototype assets.")]
+    [SerializeField] private bool useResourceLists;
+    [Tooltip("Positive quantities; these resources are spent before rewards are granted.")]
+    [SerializeField] private ResourceAmount[] requiredResources = new ResourceAmount[0];
+    [SerializeField] private ResourceAmount[] gainedResources = new ResourceAmount[0];
+    [Tooltip("Any listed tile is allowed. List all three types for unrestricted buildings.")]
+    [SerializeField] private TileType[] allowedTileTypes = new TileType[0];
 
     [Header("Resource")]
     [SerializeField]
@@ -32,14 +45,53 @@ public class BuildingData : ScriptableObject
     [SerializeField]
     private int consumeAmount;
 
-    // ¿ÜºÎ Á¢±Ù¿ë ÇÁ·ÎÆÛÆ¼
+    // ì™¸ë¶€ ì ‘ê·¼ìš© í”„ë¡œí¼í‹°
     public int BuildingCode => buildingCode;
     public string BuildingName => buildingName;
+    public string Code => $"B{buildingCode:00000}";
+    public Sprite CardImage => cardImage;
+    public bool UsesResourceLists => useResourceLists;
 
-    // °Ç¹° ¿ÜÇü ÇÁ¸®ÆÕ
+    // The serialized legacy fields below stay intact until prototype callers are replaced.
+    public IReadOnlyList<ResourceAmount> RequiredResources => useResourceLists
+        ? Array.AsReadOnly(requiredResources)
+        : Array.AsReadOnly(consumeAmount == 0 ? new ResourceAmount[0]
+            : new[] { new ResourceAmount(consumeResource, consumeAmount) });
+
+    public IReadOnlyList<ResourceAmount> GainedResources => useResourceLists
+        ? Array.AsReadOnly(gainedResources)
+        : Array.AsReadOnly(produceAmount == 0 ? new ResourceAmount[0]
+            : new[] { new ResourceAmount(produceResource, produceAmount) });
+
+    public IReadOnlyList<TileType> AllowedTileTypes => Array.AsReadOnly(allowedTileTypes);
+
+    public bool CanBuildOn(TileType type)
+    {
+        foreach (TileType allowedType in allowedTileTypes)
+            if (type == allowedType) return true;
+        return false;
+    }
+
+    public void Validate(List<string> errors)
+    {
+        if (buildingCode <= 0) errors.Add("Building code must be positive.");
+        DataValidation.ValidateResources(RequiredResources, true, errors, Code + " costs");
+        DataValidation.ValidateResources(GainedResources, true, errors, Code + " gains");
+        // Prototype assets did not define tile constraints.
+        if (!useResourceLists) return;
+        if (allowedTileTypes.Length == 0) errors.Add($"{Code}: no allowed tile types.");
+        var types = new HashSet<TileType>();
+        foreach (TileType type in allowedTileTypes)
+        {
+            if (!Enum.IsDefined(typeof(TileType), type)) errors.Add($"{Code}: unknown tile type.");
+            if (!types.Add(type)) errors.Add($"{Code}: duplicate tile type {type}.");
+        }
+    }
+
+    // ê±´ë¬¼ ì™¸í˜• í”„ë¦¬íŒ¹
     public GameObject VisualPrefab => visualPrefab;
 
-    // ResourceManager¿¡ Á¤ÀÇµÇ¾î ÀÖ´Â ResourceType¿¡ Á¢±ÙÇÏ±â À§ÇÑ ÇÁ·ÎÆÛÆ¼
+    // ResourceManagerì— ì •ì˜ë˜ì–´ ìžˆëŠ” ResourceTypeì— ì ‘ê·¼í•˜ê¸° ìœ„í•œ í”„ë¡œí¼í‹°
     public ResourceType ProduceResource => produceResource;
     public int ProduceAmount => produceAmount;
 

@@ -41,22 +41,22 @@ public class ResourceUI : MonoBehaviour
         {
             case ResourceType.Population:
                 populationText.text =
-                    $"¿Œ±∏: {value}";
+                    $"Ïù∏Íµ¨: {value}";
                 break;
 
             case ResourceType.Jobs:
                 jobsText.text =
-                    $"¿œ¿⁄∏Æ: {value}";
+                    $"ÏùºÏûêÎ¶¨: {value}";
                 break;
 
-            case ResourceType.Goods:
+            case ResourceType.Money:
                 goodsText.text =
-                    $"¿Á»≠: {value}";
+                    $"ÏûêÍ∏à: {value}";
                 break;
 
             case ResourceType.Logistics:
                 logisticsText.text =
-                    $"π∞∑˘: {value}";
+                    $"Î¨ºÎ•ò: {value}";
                 break;
         }
     }
@@ -64,15 +64,15 @@ public class ResourceUI : MonoBehaviour
     private void UpdateAllResources()
     {
         populationText.text =
-            $"¿Œ±∏: {resourceManager.GetResource(ResourceType.Population)}";
+            $"Ïù∏Íµ¨: {resourceManager.GetResource(ResourceType.Population)}";
 
         jobsText.text =
-            $"¿œ¿⁄∏Æ: {resourceManager.GetResource(ResourceType.Jobs)}";
+            $"ÏùºÏûêÎ¶¨: {resourceManager.GetResource(ResourceType.Jobs)}";
 
         goodsText.text =
-            $"¿Á»≠: {resourceManager.GetResource(ResourceType.Goods)}";
+            $"ÏûêÍ∏à: {resourceManager.GetResource(ResourceType.Money)}";
 
         logisticsText.text =
-            $"π∞∑˘: {resourceManager.GetResource(ResourceType.Logistics)}";
+            $"Î¨ºÎ•ò: {resourceManager.GetResource(ResourceType.Logistics)}";
     }
 }
