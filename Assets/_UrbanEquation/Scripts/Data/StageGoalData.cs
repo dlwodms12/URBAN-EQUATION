@@ -32,5 +32,8 @@ public class StageGoalData
             DataValidation.ValidateResources(new[] { resourceTarget }, true, errors, "Stage goal");
         if (goalType == StageGoalType.AdjacentBuildings && (buildingA == null || buildingB == null))
             errors.Add("An adjacency goal requires two building definitions.");
+        else if (goalType == StageGoalType.AdjacentBuildings
+            && (buildingA.BuildingCode <= 0 || buildingB.BuildingCode <= 0))
+            errors.Add("Adjacency goal building codes must be positive.");
     }
 }

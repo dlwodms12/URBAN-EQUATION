@@ -11,10 +11,12 @@ public class TurnHistoryManager : MonoBehaviour
     private BoardManager subscribedBoard;
     private BuildingHandManager subscribedHand;
     private ComboManager subscribedCombo;
+    private StageManager subscribedStage;
     private long observedConfiguration;
     private long observedBoardReset;
     private long observedHandInitialization;
     private long observedComboConfiguration;
+    private long observedStageConfiguration;
     private bool configured;
     private bool restoring;
 
@@ -130,6 +132,7 @@ public class TurnHistoryManager : MonoBehaviour
             || (gameSession.Combos != null && (gameSession.Combos.Board != gameSession.Board
                 || gameSession.Combos.Resources != gameSession.Resources || gameSession.Combos.IsResolving)))
         { error = "History requires initialized board/hand and matching resource/combination/stage references."; return false; }
+        if (stage != null && !stage.CanUseWith(gameSession, out error)) return false;
         return true;
     }
 
@@ -139,6 +142,7 @@ public class TurnHistoryManager : MonoBehaviour
         observedBoardReset = session.Board == null ? 0 : session.Board.ResetVersion;
         observedHandInitialization = session.Hand == null ? 0 : session.Hand.InitializationVersion;
         observedComboConfiguration = session.Combos == null ? 0 : session.Combos.ConfigurationVersion;
+        observedStageConfiguration = stageManager == null ? 0 : stageManager.ConfigurationVersion;
     }
 
     private void EnsureScope()
@@ -147,8 +151,10 @@ public class TurnHistoryManager : MonoBehaviour
         long boardVersion = session.Board == null ? 0 : session.Board.ResetVersion;
         long handVersion = session.Hand == null ? 0 : session.Hand.InitializationVersion;
         long comboVersion = session.Combos == null ? 0 : session.Combos.ConfigurationVersion;
+        long stageVersion = stageManager == null ? 0 : stageManager.ConfigurationVersion;
         if (observedConfiguration != session.ConfigurationVersion || observedBoardReset != boardVersion
-            || observedHandInitialization != handVersion || observedComboConfiguration != comboVersion)
+            || observedHandInitialization != handVersion || observedComboConfiguration != comboVersion
+            || observedStageConfiguration != stageVersion)
         {
             ObserveScope();
             InvalidateHistory();
@@ -171,6 +177,12 @@ public class TurnHistoryManager : MonoBehaviour
             subscribedCombo = session.Combos;
             if (subscribedCombo != null) subscribedCombo.OnResultsChanged += EnsureScope;
         }
+        if (isActiveAndEnabled && subscribedStage != stageManager)
+        {
+            if (subscribedStage != null) subscribedStage.OnConfigurationChanged -= EnsureScope;
+            subscribedStage = stageManager;
+            if (subscribedStage != null) subscribedStage.OnConfigurationChanged += EnsureScope;
+        }
     }
 
     private void HandleBoardReset() => EnsureScope();
@@ -185,8 +197,10 @@ public class TurnHistoryManager : MonoBehaviour
         if (subscribedBoard != null) subscribedBoard.OnBoardReset -= HandleBoardReset;
         if (subscribedHand != null) subscribedHand.OnHandChanged -= EnsureScope;
         if (subscribedCombo != null) subscribedCombo.OnResultsChanged -= EnsureScope;
+        if (subscribedStage != null) subscribedStage.OnConfigurationChanged -= EnsureScope;
         subscribedBoard = null;
         subscribedHand = null;
         subscribedCombo = null;
+        subscribedStage = null;
     }
 }

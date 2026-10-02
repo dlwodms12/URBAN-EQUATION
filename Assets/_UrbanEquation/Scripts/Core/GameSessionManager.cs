@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Building/combo completion and turn restore boundary. Goal evaluation is Phase 3-G.
+// Commit board, hand, resources, combos and goals before publishing a completed turn.
 public class GameSessionManager : MonoBehaviour
 {
     [SerializeField] private BoardManager boardManager;
@@ -20,6 +20,7 @@ public class GameSessionManager : MonoBehaviour
     public BuildingInstance BuildingPrefab => buildingPrefab;
     public ComboManager Combos => comboManager;
     public TurnHistoryManager History => turnHistory;
+    public StageManager Stage => stageManager;
     public bool IsBusy => committing;
     public long ConfigurationVersion { get; private set; }
     public event Action OnStateRestoring;
@@ -52,8 +53,25 @@ public class GameSessionManager : MonoBehaviour
     internal void AttachHistory(TurnHistoryManager history, StageManager stage)
     {
         turnHistory = history;
-        stageManager = stage;
+        BindStage(stage);
         ConfigurationVersion++;
+    }
+
+    public bool TryConfigureStage(StageManager stage, out string error)
+    {
+        error = null;
+        if (committing) { error = "Cannot configure stage while session is busy."; return false; }
+        if (stage != null && !stage.CanUseWith(this, out error)) return false;
+        if (turnHistory != null) return turnHistory.TryConfigure(this, stage, out error);
+        BindStage(stage);
+        ConfigurationVersion++;
+        return true;
+    }
+
+    private void BindStage(StageManager stage)
+    {
+        if (stageManager != null) stageManager.UnbindSession(this);
+        stageManager = stage;
     }
 
     internal void DetachHistory(TurnHistoryManager history)
@@ -64,6 +82,10 @@ public class GameSessionManager : MonoBehaviour
     public bool CanBuild(int cardId, Vector2Int coordinate, out string error)
     {
         if (committing) { error = "A building transaction is already in progress."; return false; }
+        if (stageManager != null && !stageManager.CanUseWith(this, out error)) return false;
+        if (stageManager != null) stageManager.BindSession(this);
+        if (stageManager != null && stageManager.IsConfigured && stageManager.IsCleared)
+        { error = "The stage has been completed."; return false; }
         if (turnHistory != null && !turnHistory.CanRecordFor(this, out error)) return false;
         if (comboManager != null && (comboManager.Board != boardManager
             || comboManager.Resources != resourceManager || comboManager.IsResolving))
@@ -87,6 +109,7 @@ public class GameSessionManager : MonoBehaviour
         if (card.Building.VisualPrefab == null)
         { error = "The selected building has no visual prefab."; return false; }
 
+        if (stageManager != null) stageManager.BindSession(this);
         committing = true;
         GameObject stagingRoot = null;
         BuildingInstance candidate = null;
@@ -124,6 +147,8 @@ public class GameSessionManager : MonoBehaviour
                 tile.TrySetBuilding(null);
                 return false;
             }
+            ResourceAmount[] resourcesBefore = stageManager != null && stageManager.IsConfigured
+                ? resourceManager.CaptureResourceState() : null;
             if (!resourceManager.TryApplyBuildingAndRewardsDeferred(card.Building,
                 ComboManager.RewardLists(comboResults), out Action publishResources))
             {
@@ -133,6 +158,17 @@ public class GameSessionManager : MonoBehaviour
                 return false;
             }
 
+            Action applyGoals = () => { }, publishGoals = () => { };
+            if (stageManager != null && stageManager.IsConfigured
+                && !stageManager.TryPrepareGoalEvaluation(out applyGoals, out publishGoals, out error))
+            {
+                resourceManager.TryPrepareResourceRestore(resourcesBefore, out Action rollbackResources, out _);
+                rollbackResources();
+                buildingHand.RestoreRemovedCard(index, removed);
+                tile.TrySetBuilding(null);
+                return false;
+            }
+            applyGoals();
             Action publishCombos = comboManager == null ? (Action)(() => { })
                 : comboManager.RecordPreparedResults(comboResults);
             LastComboResults = Array.AsReadOnly((ComboResult[])comboResults.Clone());
@@ -142,8 +178,8 @@ public class GameSessionManager : MonoBehaviour
             publishResources();
             buildingHand.PublishHandChanged();
             publishCombos();
+            publishGoals();
             OnBuildingCommitted?.Invoke(building, removed);
-            // Phase 3-G evaluates goals before this completed-turn capture.
             if (turnHistory != null) turnHistory.RecordCompletedTurn(this);
             OnBuildResolved?.Invoke(building, LastComboResults);
             return true;
