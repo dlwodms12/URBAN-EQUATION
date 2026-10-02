@@ -123,6 +123,44 @@ public class ResourceManager : MonoBehaviour
         return true;
     }
 
+    internal bool TryApplyBuildingAndRewardsDeferred(BuildingData building,
+        IReadOnlyList<IReadOnlyList<ResourceAmount>> rewards, out Action publish)
+    {
+        publish = null;
+        if (building == null || !TryPrepareChange(building.RequiredResources,
+            building.GainedResources, false, out var next)
+            || !TryPrepareRewards(next, rewards, out var final)) return false;
+        publish = CommitStateDeferred(final, false);
+        return true;
+    }
+
+    internal bool TryApplyRewardsDeferred(IReadOnlyList<IReadOnlyList<ResourceAmount>> rewards,
+        out Action publish)
+    {
+        EnsureInitialized();
+        publish = null;
+        if (!TryPrepareRewards(resources, rewards, out var next)) return false;
+        publish = CommitStateDeferred(next, false);
+        return true;
+    }
+
+    private static bool TryPrepareRewards(Dictionary<ResourceType, int> start,
+        IReadOnlyList<IReadOnlyList<ResourceAmount>> rewards,
+        out Dictionary<ResourceType, int> next)
+    {
+        next = null;
+        if (rewards == null) return false;
+        var candidate = new Dictionary<ResourceType, int>(start);
+        foreach (IReadOnlyList<ResourceAmount> reward in rewards)
+        {
+            if (!TryPrepareChangeFromState(candidate, EmptyAmounts, reward, true, out var updated))
+                return false;
+            candidate = updated;
+        }
+        next = candidate;
+        return true;
+    }
+
     public bool TryApplyComboResources(ComboDefinition combo)
     {
         return combo != null && combo.Rewards.Count > 0 && TryAddResources(combo.Rewards);
@@ -176,6 +214,13 @@ public class ResourceManager : MonoBehaviour
         out Dictionary<ResourceType, int> next)
     {
         EnsureInitialized();
+        return TryPrepareChangeFromState(resources, costs, gains, allowSignedGains, out next);
+    }
+
+    private static bool TryPrepareChangeFromState(Dictionary<ResourceType, int> state,
+        IReadOnlyList<ResourceAmount> costs, IReadOnlyList<ResourceAmount> gains,
+        bool allowSignedGains, out Dictionary<ResourceType, int> next)
+    {
         next = null;
         if (!TryReadAmounts(costs, false, false, out var costMap)
             || !TryReadAmounts(gains, allowSignedGains, false, out var gainMap)) return false;
@@ -185,7 +230,7 @@ public class ResourceManager : MonoBehaviour
         {
             costMap.TryGetValue(type, out int cost);
             gainMap.TryGetValue(type, out int gain);
-            int current = resources[type];
+            int current = state[type];
             // Rewards from this build cannot pay its own upfront costs.
             if (cost > 0 && current < cost) return false;
             long value = (long)current - cost + gain;
