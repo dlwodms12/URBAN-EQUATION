@@ -68,11 +68,11 @@ Resource enum의 책임만 ResourceManager에서 ResourceType.cs로 이동합니
 
 Unity 적용 후 확인 순서:
 
-1. PR을 병합하고 로컬 main을 Pull합니다.
+1. GitHub Desktop에서 Fetch origin 후 `codex/phase3a-data-definitions` 브랜치를 선택합니다.
 2. Unity import가 끝나면 Console의 빨간 컴파일 오류를 확인합니다.
 3. Window > General > Test Runner > EditMode에서 `DataContractTests` 8개를 실행합니다.
 4. Prototype 씬에서 기존 건물 4종의 참조 및 배치/자원/Reset 흐름을 확인합니다.
-5. 성공 결과를 로드맵에 기록한 뒤 Phase 3-B를 진행합니다.
+5. 성공 결과를 로드맵에 기록하고 PR 병합 후 main을 Pull한 뒤 Phase 3-B를 진행합니다.
 
 테스트는 enum 직렬화 번호, 레거시 건물 자원, 복수 자원 목록,
 북쪽 행 좌표 대응, 건물 순서와 무관한 콤보, 동일 콤보 코드 여러 행,
