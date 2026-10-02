@@ -3,10 +3,12 @@
 ## 상태와 범위
 
 2026-10-03T04:18:29+09:00 사용자가 3-F 누적 테스트 95개 통과와 Prototype 정상 작동을 확인했습니다.
-다음 3-G 코드를 작성하고 StageGoalContractTests 28개를 추가했습니다. 전체 예상 EditMode는 **123개**입니다.
+3-G 코드를 작성하고 StageGoalContractTests 28개를 추가했습니다. 해당 단계의 전체 EditMode는 **123개**입니다.
+2026-10-03T04:51:49+09:00: 사용자가 123개 통과와 Prototype 정상 작동을 확인하여 3-G 검증을 완료했습니다.
+최신 저장 구현/전체 155개 검증은 Docs/PHASE3H_SAVE.md를 봅니다.
 현재 브랜치: **codex/phase3g-stage-goals**.
 기준: codex/phase3f-turn-history, 2ad223d4268a5f9554b399e8b4b1c808a10e11aa.
-AI 환경에는 Unity/C# 컴파일러가 없어 이번 단계의 실제 컴파일/테스트/Prototype 실행은 사용자 검증 대기입니다.
+3-G 실행 검증은 위 사용자 확인으로 완료했습니다. AI가 직접 Unity를 실행한 것으로 기록하지 않습니다.
 
 기획서 8/24/28/31/33페이지의 필수/추가 목표, 계속 건설, 메인 NEXT STAGE 완료 시점을 기준으로 구현했습니다.
 추가 목표는 선택 달성 대상입니다. 각 StageData에는 추가 목표 정의 2개가 반드시 필요합니다.
@@ -122,4 +124,4 @@ StageData를 설정하지 않은 기존 StageManager는 Population>=4, CheckStag
 랭크 조합, 설정 실패 보존, 콤보 후 첫 알림, Snapshot/Undo, 완료 조건/값 복사/중복/재진입,
 외부 변경 재평가, 완료 후 Undo, Stage 재설정/Reset, 실패 턴, 버튼 구독, 기존 인구 4 흐름을 검사합니다.
 테스트 클래스가 누락되면 브랜치와 실제 Editor 파일 목록, Console/필터를 확인합니다.
-다음 단계는 사용자 검증 완료 후 **3-H: 진행도·해금·최고 랭크 저장**입니다.
+3-H 진행도·해금·최고 랭크 저장 코드를 작성했습니다. 최신 안내는 Docs/PHASE3H_SAVE.md입니다.
