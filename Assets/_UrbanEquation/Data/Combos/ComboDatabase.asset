@@ -1,0 +1,255 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 413c6ca26acb42ee9f64c9b1063e884e, type: 3}
+  m_Name: ComboDatabase
+  m_EditorClassIdentifier:
+  combos:
+  - comboCode: 11001
+    comboName: "마을의 탄생"
+    description: "친절한 이웃이 생겼어요."
+    buildingCodeA: 11001
+    buildingCodeB: 11001
+    rewards:
+    - resource: 0
+      amount: 1
+  - comboCode: 11001
+    comboName: "마을의 탄생"
+    description: "친절한 이웃이 생겼어요."
+    buildingCodeA: 11001
+    buildingCodeB: 12001
+    rewards:
+    - resource: 0
+      amount: 1
+  - comboCode: 11001
+    comboName: "마을의 탄생"
+    description: "친절한 이웃이 생겼어요."
+    buildingCodeA: 12001
+    buildingCodeB: 12001
+    rewards:
+    - resource: 0
+      amount: 1
+  - comboCode: 11001
+    comboName: "마을의 탄생"
+    description: "친절한 이웃이 생겼어요."
+    buildingCodeA: 12001
+    buildingCodeB: 13001
+    rewards:
+    - resource: 0
+      amount: 1
+  - comboCode: 11001
+    comboName: "마을의 탄생"
+    description: "친절한 이웃이 생겼어요."
+    buildingCodeA: 13001
+    buildingCodeB: 11001
+    rewards:
+    - resource: 0
+      amount: 1
+  - comboCode: 33001
+    comboName: "부촌"
+    description: "그들만의 리그입니다."
+    buildingCodeA: 13001
+    buildingCodeB: 13001
+    rewards:
+    - resource: 2
+      amount: 3
+  - comboCode: 21001
+    comboName: "도시의 탄생"
+    description: "일할 시간입니다."
+    buildingCodeA: 21001
+    buildingCodeB: 21001
+    rewards:
+    - resource: 1
+      amount: 1
+  - comboCode: 21001
+    comboName: "도시의 탄생"
+    description: "일할 시간입니다."
+    buildingCodeA: 21001
+    buildingCodeB: 22001
+    rewards:
+    - resource: 1
+      amount: 1
+  - comboCode: 21001
+    comboName: "도시의 탄생"
+    description: "일할 시간입니다."
+    buildingCodeA: 22001
+    buildingCodeB: 22001
+    rewards:
+    - resource: 1
+      amount: 1
+  - comboCode: 21001
+    comboName: "도시의 탄생"
+    description: "일할 시간입니다."
+    buildingCodeA: 22001
+    buildingCodeB: 23001
+    rewards:
+    - resource: 1
+      amount: 1
+  - comboCode: 21001
+    comboName: "도시의 탄생"
+    description: "일할 시간입니다."
+    buildingCodeA: 23001
+    buildingCodeB: 21001
+    rewards:
+    - resource: 1
+      amount: 1
+  - comboCode: 53001
+    comboName: "마천루"
+    description: "마천루의 저주를 피했군요."
+    buildingCodeA: 23001
+    buildingCodeB: 23001
+    rewards:
+    - resource: 4
+      amount: 3
+  - comboCode: 31001
+    comboName: "상가의 탄생"
+    description: "밥이나 한 끼 먹죠."
+    buildingCodeA: 31001
+    buildingCodeB: 31001
+    rewards:
+    - resource: 2
+      amount: 1
+  - comboCode: 31001
+    comboName: "상가의 탄생"
+    description: "밥이나 한 끼 먹죠."
+    buildingCodeA: 31001
+    buildingCodeB: 32001
+    rewards:
+    - resource: 2
+      amount: 1
+  - comboCode: 31001
+    comboName: "상가의 탄생"
+    description: "밥이나 한 끼 먹죠."
+    buildingCodeA: 32001
+    buildingCodeB: 32001
+    rewards:
+    - resource: 2
+      amount: 1
+  - comboCode: 31001
+    comboName: "상가의 탄생"
+    description: "밥이나 한 끼 먹죠."
+    buildingCodeA: 32001
+    buildingCodeB: 33001
+    rewards:
+    - resource: 2
+      amount: 1
+  - comboCode: 31001
+    comboName: "상가의 탄생"
+    description: "밥이나 한 끼 먹죠."
+    buildingCodeA: 33001
+    buildingCodeB: 31001
+    rewards:
+    - resource: 2
+      amount: 1
+  - comboCode: 13001
+    comboName: "번화가"
+    description: "사람과 돈이 몰리고 있습니다."
+    buildingCodeA: 33001
+    buildingCodeB: 33001
+    rewards:
+    - resource: 0
+      amount: 3
+  - comboCode: 41001
+    comboName: "공업의 탄생"
+    description: "자본이 흐르기 시작했습니다."
+    buildingCodeA: 41001
+    buildingCodeB: 41001
+    rewards:
+    - resource: 3
+      amount: 1
+  - comboCode: 41001
+    comboName: "공업의 탄생"
+    description: "자본이 흐르기 시작했습니다."
+    buildingCodeA: 41001
+    buildingCodeB: 42001
+    rewards:
+    - resource: 3
+      amount: 1
+  - comboCode: 41001
+    comboName: "공업의 탄생"
+    description: "자본이 흐르기 시작했습니다."
+    buildingCodeA: 42001
+    buildingCodeB: 42001
+    rewards:
+    - resource: 3
+      amount: 1
+  - comboCode: 41001
+    comboName: "공업의 탄생"
+    description: "자본이 흐르기 시작했습니다."
+    buildingCodeA: 42001
+    buildingCodeB: 43001
+    rewards:
+    - resource: 3
+      amount: 1
+  - comboCode: 41001
+    comboName: "공업의 탄생"
+    description: "자본이 흐르기 시작했습니다."
+    buildingCodeA: 43001
+    buildingCodeB: 41001
+    rewards:
+    - resource: 3
+      amount: 1
+  - comboCode: 43001
+    comboName: "대규모 공업 지대"
+    description: "도시의 근본입니다."
+    buildingCodeA: 43001
+    buildingCodeB: 43001
+    rewards:
+    - resource: 1
+      amount: 3
+  - comboCode: 51001
+    comboName: "관광지의 탄생"
+    description: "사진을 찍어요!"
+    buildingCodeA: 51001
+    buildingCodeB: 51001
+    rewards:
+    - resource: 4
+      amount: 1
+  - comboCode: 51001
+    comboName: "관광지의 탄생"
+    description: "사진을 찍어요!"
+    buildingCodeA: 51001
+    buildingCodeB: 52001
+    rewards:
+    - resource: 4
+      amount: 1
+  - comboCode: 51001
+    comboName: "관광지의 탄생"
+    description: "사진을 찍어요!"
+    buildingCodeA: 52001
+    buildingCodeB: 52001
+    rewards:
+    - resource: 4
+      amount: 1
+  - comboCode: 51001
+    comboName: "관광지의 탄생"
+    description: "사진을 찍어요!"
+    buildingCodeA: 52001
+    buildingCodeB: 53001
+    rewards:
+    - resource: 4
+      amount: 1
+  - comboCode: 51001
+    comboName: "관광지의 탄생"
+    description: "사진을 찍어요!"
+    buildingCodeA: 53001
+    buildingCodeB: 51001
+    rewards:
+    - resource: 4
+      amount: 1
+  - comboCode: 43001
+    comboName: "랜드마크"
+    description: "황금알을 낳는 거위"
+    buildingCodeA: 53001
+    buildingCodeB: 53001
+    rewards:
+    - resource: 3
+      amount: 3

@@ -1,7 +1,7 @@
 # URBAN EQUATION 개발 로드맵
 
 기준: 2026-10-01 수정 기획서(33페이지)와 사용자 확정 답변.
-작업 시작 전에 이 파일과 현재 단계의 변경 안내(`Docs/PHASE3D_BUILDINGS.md`)를 읽습니다.
+작업 시작 전에 이 파일과 현재 단계의 변경 안내(`Docs/PHASE3E_COMBOS.md`)를 읽습니다.
 전체 상세 로드맵: `dlwodms12/LJE_GPT_Log`의
 `memory/entries/MEM-20261001-0610-urban-equation-development-roadmap-v1.md`.
 
@@ -12,8 +12,8 @@
 - [x] Phase 3-A: 공통 데이터 정의 (사용자 Unity 컴파일·EditMode 8개·Prototype 검증 완료)
 - [x] Phase 3-B: StageData 기반 보드·타일 생성 (사용자 EditMode 17개·Prototype 검증 완료)
 - [x] Phase 3-C: 5종 자원·요구/획득 자원 목록 처리 (사용자 EditMode 31개·Prototype 검증 완료)
-- [ ] Phase 3-D: 카드 순서·수량·드래그·건설 (코드·테스트 작성 완료, Unity 검증 대기)
-- [ ] Phase 3-E: 콤보 판정·결과·순차 연출 데이터
+- [x] Phase 3-D: 카드 순서·수량·드래그·건설 (사용자 EditMode 51개·Prototype 검증 완료)
+- [ ] Phase 3-E: 콤보 판정·결과·순차 연출 데이터 (코드·테스트·30행 asset 작성 완료, Unity 검증 대기)
 - [ ] Phase 3-F: 턴 완료 Snapshot·다단계 Undo
 - [ ] Phase 3-G: 목표·랭크·NEXT STAGE 판정
 - [ ] Phase 3-H: 진행도·해금·최고 랭크 저장
@@ -40,11 +40,16 @@ Art 폴더는 새로 만들지 않고 현재 Fonts/Materials/Sprite 위치로 �
 2026-10-03: 사용자가 좌표 허용 오차 수정 후 전체 EditMode 17개 통과를 확인했습니다.
 앞서 확인한 Console 무오류·Prototype 정상 동작 결과와 함께 3-B를 완료 처리했습니다.
 2026-10-03: 사용자가 Phase 3-C 테스트 및 Prototype 정상 작동을 확인하여 3-C를 완료 처리했습니다.
-Phase 3-D의 개별 카드 목록·활성 판정·드래그 프리뷰·건설 트랜잭션·카드 표시 코드를 작성했습니다.
-BuildingContractTests 20개를 추가하여 전체 EditMode는 51개입니다.
-이 환경에는 Unity/C# 컴파일러가 없어 3-D 컴파일·새 테스트 실행·Prototype은 사용자 검증 대기입니다.
-다음 개발은 3-D 검증 완료 후 Phase 3-E(콤보 판정·결과·순차 연출 데이터)입니다.
-본 개발용 BuildingData 15종·콤보 표·Stage 1/2 asset 입력 및 프리팹 연결은 아직 수행하지 않았습니다.
+2026-10-03: 사용자가 Phase 3-D 테스트 및 Prototype 정상 작동을 확인하여 3-D를 완료 처리했습니다.
+Phase 3-E의 4방향 콤보 판정·쌍별 중복 보상 방지·결과 저장·표시 큐·건설 연동을 작성했습니다.
+기획서의 30행을 Data/Combos/ComboDatabase.asset에 입력했습니다.
+ComboContractTests 20개를 추가하여 전체 EditMode는 71개입니다.
+이 환경에는 Unity/C# 컴파일러가 없어 3-E 컴파일·새 테스트 실행·Prototype은 사용자 검증 대기입니다.
+브랜치: codex/phase3e-combos. 기준: 사용자 검증을 마친 codex/phase3d-building-cards.
+다음 확인: 전체 EditMode 71개, 기존 Prototype 건설/콤보/Reset 및 복수 콤보의 순차 표시.
+새 테스트는 fixture를 생성하므로 Inspector 변경 없이 실행합니다.
+다음 개발은 3-E 검증 완료 후 Phase 3-F(턴 완료 Snapshot·다단계 Undo)입니다.
+본 개발용 BuildingData 15종·Stage 1/2 asset 입력 및 새 씬/프리팹 연결은 후속 단계입니다.
+새 콤보 asset의 실제 Game 씬 연결 및 최종 팝업 위치·시간·페이드는 후속 통합/Phase 4에서 수행합니다.
 기존 `Assets/ScriptableObjects`의 데이터는 대체 런타임과 새 데이터 연결이 끝날 때까지 유지합니다.
-
 

@@ -1,113 +1,101 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class ComboUI : MonoBehaviour
 {
-    [SerializeField]
-    private ComboManager comboManager;
-
-    [SerializeField]
-    private TMP_Text comboText;
-
-    [SerializeField]
-    private float displayDuration = 2f;
-
+    [SerializeField] private ComboManager comboManager;
+    [SerializeField] private TMP_Text comboText;
+    // Preserve the prototype's existing serialized duration; final visual timing is Phase 4.
+    [SerializeField] private float displayDuration = 2f;
     private Coroutine displayCoroutine;
+    private ComboManager subscribedManager;
 
+    private void OnEnable() => Subscribe();
     private void Start()
     {
-        comboManager.OnComboTriggered += ShowCombo;
+        Subscribe();
+        if (comboManager != null && comboManager.CurrentPresentation != null)
+            ShowCombo(comboManager.CurrentPresentation);
+        else ResetLocalDisplay();
+    }
+    private void OnDisable() { Unsubscribe(); ResetLocalDisplay(); }
+    private void OnDestroy() { Unsubscribe(); ResetLocalDisplay(); }
 
-        comboText.gameObject.SetActive(false);
+    private void Subscribe()
+    {
+        if (subscribedManager == comboManager) return;
+        Unsubscribe();
+        subscribedManager = comboManager;
+        if (subscribedManager == null) return;
+        subscribedManager.OnPresentationRequested += ShowCombo;
+        subscribedManager.OnPresentationCleared += ResetLocalDisplay;
+        if (subscribedManager.CurrentPresentation != null) ShowCombo(subscribedManager.CurrentPresentation);
     }
 
-    private void OnDestroy()
+    private void Unsubscribe()
     {
-        if (comboManager != null)
+        if (subscribedManager != null)
         {
-            comboManager.OnComboTriggered -= ShowCombo;
+            subscribedManager.OnPresentationRequested -= ShowCombo;
+            subscribedManager.OnPresentationCleared -= ResetLocalDisplay;
         }
+        subscribedManager = null;
     }
 
-    private void ShowCombo(
-        int comboCode,
-        int buildingCodeA,
-        int buildingCodeB,
-        ResourceType rewardResource,
-        int rewardAmount)
+    private void ShowCombo(ComboResult result)
     {
-        string amountText;
-
-        if (rewardAmount > 0)
-        {
-            amountText = $"+{rewardAmount}";
-        }
-        else
-        {
-            amountText = rewardAmount.ToString();
-        }
-
-        comboText.text =
-            $"COMBO {comboCode}\n" +
-            $"{buildingCodeA} + {buildingCodeB}\n" +
-            $"{GetResourceName(rewardResource)} {amountText}";
-
+        if (comboText == null || !isActiveAndEnabled) return;
+        ResetLocalDisplay();
+        comboText.text = FormatComboResult(result);
         comboText.gameObject.SetActive(true);
-
-        if (displayCoroutine != null)
-        {
-            StopCoroutine(displayCoroutine);
-        }
-
-        displayCoroutine =
-            StartCoroutine(HideAfterDelay());
+        displayCoroutine = StartCoroutine(CompleteAfterDelay(result));
     }
 
-    private IEnumerator HideAfterDelay()
+    private IEnumerator CompleteAfterDelay(ComboResult result)
     {
-        yield return new WaitForSeconds(
-            displayDuration
-        );
-
-        comboText.gameObject.SetActive(false);
-
+        yield return new WaitForSeconds(displayDuration);
+        if (comboText != null) comboText.gameObject.SetActive(false);
         displayCoroutine = null;
+        if (comboManager != null) comboManager.TryCompletePresentation(result);
     }
 
-    private string GetResourceName(
-        ResourceType resourceType)
+    public static string FormatComboResult(ComboResult result)
     {
-        switch (resourceType)
+        if (result == null) return string.Empty;
+        var lines = new List<string>();
+        lines.Add(string.IsNullOrEmpty(result.ComboName) ? $"COMBO {result.ComboCode}" : result.ComboName);
+        lines.Add(string.IsNullOrEmpty(result.Description)
+            ? $"{result.BuildingCodeA} + {result.BuildingCodeB}" : result.Description);
+        foreach (ResourceAmount reward in result.Rewards)
+            lines.Add($"{GetResourceName(reward.Resource)} {(reward.Amount > 0 ? "+" : "")}{reward.Amount}");
+        return string.Join("\n", lines);
+    }
+
+    private static string GetResourceName(ResourceType type)
+    {
+        switch (type)
         {
-            case ResourceType.Population:
-                return "ÀÎ±¸";
-
-            case ResourceType.Jobs:
-                return "ÀÏÀÚ¸®";
-
-            case ResourceType.Money:
-                return "ÀçÈ­";
-
-            case ResourceType.Logistics:
-                return "¹°·ù";
-
-            default:
-                return resourceType.ToString();
+            case ResourceType.Population: return "인구";
+            case ResourceType.Jobs: return "일자리";
+            case ResourceType.Money: return "자금";
+            case ResourceType.Logistics: return "물류";
+            case ResourceType.Tourism: return "관광";
+            default: return type.ToString();
         }
+    }
+
+    private void ResetLocalDisplay()
+    {
+        if (displayCoroutine != null) { StopCoroutine(displayCoroutine); displayCoroutine = null; }
+        if (comboText != null) comboText.gameObject.SetActive(false);
     }
 
     public void ResetUI()
     {
-        if (displayCoroutine != null)
-        {
-            StopCoroutine(displayCoroutine);
-            displayCoroutine = null;
-        }
-
-        if (comboText != null)
-        {
-            comboText.gameObject.SetActive(false);
-        }
+        ResetLocalDisplay();
+        if (comboManager != null) comboManager.ClearPresentations();
     }
 }
+

@@ -20,6 +20,8 @@ public class BoardManager : MonoBehaviour
     public int Height => tiles == null ? 0 : tiles.GetLength(1);
     public StageData CurrentStage { get; private set; }
     public bool HasBoard => tiles != null;
+    public long ResetVersion { get; private set; }
+    public event Action OnBoardReset;
 
     private void Awake()
     {
@@ -161,6 +163,8 @@ public class BoardManager : MonoBehaviour
             tile.ClearBuilding();
             tile.SetHighlight(false);
         }
+        ResetVersion++;
+        OnBoardReset?.Invoke();
     }
 
     public void ClearBoard()

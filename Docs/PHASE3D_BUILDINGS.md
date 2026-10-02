@@ -6,7 +6,9 @@ StageData.BuildingCards를 순서대로 펼쳐 Count만큼 개별 카드를 생�
 같은 BuildingData도 CardId가 다른 독립 카드이며 사용한 카드만 제거하고 나머지 순서를 유지합니다.
 자원에 따른 카드 활성/비활성, 드래그 프리뷰, 타일·점유·자원 재검사 및 실제 건설 처리를 구현했습니다.
 3-C는 사용자 테스트/Prototype 확인으로 완료했습니다.
-3-D 정적 점검 및 BuildingContractTests 20개 작성 완료, Unity 실행 검증은 대기입니다.
+3-D 정적 점검 및 BuildingContractTests 20개 작성 완료.
+2026-10-03 사용자가 전체 EditMode 51개 및 기존 Prototype 정상 작동을 확인하여 3-D를 완료 처리했습니다.
+현재 단계는 Docs/PHASE3E_COMBOS.md를 참조합니다. 아래 내용은 3-D 구현 당시의 범위입니다.
 
 ## 파일 처리
 
