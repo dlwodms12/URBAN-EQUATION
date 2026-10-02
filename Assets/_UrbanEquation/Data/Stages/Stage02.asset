@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 120556e416a241d78d3462fd9a559087, type: 3}
+  m_Name: Stage02
+  m_EditorClassIdentifier:
+  stageNumber: 2
+  stageName: Stage 2
+  introduction: "다양한 자원과 건설에 자원이 소모된다는 것을 이해하기"
+  width: 3
+  height: 3
+  tiles:
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  - {fileID: 11400000, guid: a0b87f7593105c018efece0d41db358e, type: 2}
+  initialResources:
+  - resource: 0
+    amount: 0
+  - resource: 1
+    amount: 1
+  - resource: 2
+    amount: 0
+  - resource: 3
+    amount: 1
+  - resource: 4
+    amount: 0
+  buildingCards:
+  - building: {fileID: 11400000, guid: 6ce4b2cddbaa5d948e3b48ac78d4fc97, type: 2}
+    count: 1
+  - building: {fileID: 11400000, guid: 64cc57dd6a09514e9088066f80e1acf0, type: 2}
+    count: 1
+  - building: {fileID: 11400000, guid: ae48ac005f3859948341e54f28a63f42, type: 2}
+    count: 1
+  - building: {fileID: 11400000, guid: a67613b1ab5159d9995f83f4b34f84c8, type: 2}
+    count: 1
+  - building: {fileID: 11400000, guid: b4e7b2f083f6554f8aacb12cc87f0712, type: 2}
+    count: 1
+  requiredGoal:
+    goalType: 1
+    description: "모든 카드 사용"
+    resourceTarget:
+      resource: 0
+      amount: 0
+    buildingA: {fileID: 0}
+    buildingB: {fileID: 0}
+  additionalGoals:
+  - goalType: 2
+    description: "소형 주택과 식당 인접"
+    resourceTarget:
+      resource: 0
+      amount: 0
+    buildingA: {fileID: 11400000, guid: 6ce4b2cddbaa5d948e3b48ac78d4fc97, type: 2}
+    buildingB: {fileID: 11400000, guid: ae48ac005f3859948341e54f28a63f42, type: 2}
+  - goalType: 2
+    description: "소형 공장과 소형 사무실 인접"
+    resourceTarget:
+      resource: 0
+      amount: 0
+    buildingA: {fileID: 11400000, guid: a67613b1ab5159d9995f83f4b34f84c8, type: 2}
+    buildingB: {fileID: 11400000, guid: 64cc57dd6a09514e9088066f80e1acf0, type: 2}

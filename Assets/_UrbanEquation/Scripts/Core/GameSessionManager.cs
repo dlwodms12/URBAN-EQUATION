@@ -89,6 +89,7 @@ public class GameSessionManager : MonoBehaviour
     {
         if (stageManager != null) stageManager.UnbindSession(this);
         stageManager = stage;
+        if (stageManager != null) stageManager.BindSession(this);
     }
 
     internal void DetachHistory(TurnHistoryManager history)
