@@ -4,34 +4,43 @@ using UnityEngine;
 
 public class ResourceManager : MonoBehaviour
 {
-    [Header("Initial Resources")]
-    [SerializeField]
-    private int initialPopulation = 2;
+    [Header("Initial Resources (Prototype)")]
+    [SerializeField] private int initialPopulation = 2;
+    [SerializeField] private int initialJobs = 2;
+    // Keep the serialized name; value 2 now represents Money.
+    [SerializeField] private int initialGoods = 2;
+    [SerializeField] private int initialLogistics = 2;
+    [SerializeField] private int initialTourism = 0;
 
-    [SerializeField]
-    private int initialJobs = 2;
-
-    [SerializeField]
-    private int initialGoods = 2;
-
-    [SerializeField]
-    private int initialLogistics = 2;
-
-    [SerializeField]
-    private int initialTourism = 0;
+    private static readonly ResourceType[] ResourceTypes =
+    {
+        ResourceType.Population, ResourceType.Jobs, ResourceType.Money,
+        ResourceType.Logistics, ResourceType.Tourism
+    };
+    private static readonly ResourceAmount[] EmptyAmounts = new ResourceAmount[0];
 
     private Dictionary<ResourceType, int> resources;
+    private Dictionary<ResourceType, int> initialState;
+    private bool hasStageInitialState;
 
     public event Action<ResourceType, int> OnResourceChanged;
+    public event Action OnResourcesChanged;
 
     private void Awake()
     {
-        InitializeResources();
+        EnsureInitialized();
     }
 
-    private void InitializeResources()
+    private void EnsureInitialized()
     {
-        resources = new Dictionary<ResourceType, int>
+        if (resources != null) return;
+        initialState = CreatePrototypeState();
+        resources = new Dictionary<ResourceType, int>(initialState);
+    }
+
+    private Dictionary<ResourceType, int> CreatePrototypeState()
+    {
+        return new Dictionary<ResourceType, int>
         {
             { ResourceType.Population, initialPopulation },
             { ResourceType.Jobs, initialJobs },
@@ -41,100 +50,173 @@ public class ResourceManager : MonoBehaviour
         };
     }
 
+    public bool TryInitializeFromStage(StageData stage)
+    {
+        EnsureInitialized();
+        if (stage == null
+            || !TryReadAmounts(stage.InitialResources, false, true, out var next)) return false;
+        initialState = new Dictionary<ResourceType, int>(next);
+        hasStageInitialState = true;
+        CommitState(next, true);
+        return true;
+    }
+
     public void ResetResources()
     {
-        InitializeResources();
+        EnsureInitialized();
+        if (!hasStageInitialState) initialState = CreatePrototypeState();
+        CommitState(new Dictionary<ResourceType, int>(initialState), true);
+    }
 
-        foreach (ResourceType resourceType in
-            System.Enum.GetValues(typeof(ResourceType)))
-        {
-            NotifyResourceChanged(resourceType);
-        }
+    public bool TryGetResource(ResourceType resourceType, out int amount)
+    {
+        EnsureInitialized();
+        return resources.TryGetValue(resourceType, out amount);
     }
 
     public int GetResource(ResourceType resourceType)
     {
-        if (!resources.ContainsKey(resourceType))
-        {
-            Debug.LogWarning(
-                $"존재하지 않는 자원입니다: {resourceType}"
-            );
-
-            return 0;
-        }
-
-        return resources[resourceType];
+        if (TryGetResource(resourceType, out int amount)) return amount;
+        Debug.LogWarning($"Unknown resource: {resourceType}", this);
+        return 0;
     }
 
-    // 건물 배치 가능 여부를 판단
-    public bool CanConsume(
-        ResourceType resourceType,
-        int amount)
+    public bool CanAffordResources(IReadOnlyList<ResourceAmount> costs)
     {
-        return GetResource(resourceType) >= amount;
+        return TryPrepareChange(costs, EmptyAmounts, false, out _);
     }
 
-    public bool Consume(
-        ResourceType resourceType,
-        int amount)
+    public bool CanAffordBuilding(BuildingData building)
     {
-        if (amount <= 0)
-        {
-            return true;
-        }
+        return building != null && CanAffordResources(building.RequiredResources);
+    }
 
-        if (!CanConsume(resourceType, amount))
-        {
-            return false;
-        }
-
-        resources[resourceType] -= amount;
-
-        NotifyResourceChanged(resourceType);
-
+    public bool TryConsumeResources(IReadOnlyList<ResourceAmount> costs)
+    {
+        if (!TryPrepareChange(costs, EmptyAmounts, false, out var next)) return false;
+        CommitState(next, false);
         return true;
     }
 
-    public void Add(
-        ResourceType resourceType,
-        int amount)
+    public bool TryAddResources(IReadOnlyList<ResourceAmount> amounts)
     {
-        if (amount == 0)
-        {
-            return;
-        }
-
-        resources[resourceType] += amount;
-
-        NotifyResourceChanged(resourceType);
+        // Signed deltas preserve the prototype's Add behavior, including negative combos.
+        if (!TryPrepareChange(EmptyAmounts, amounts, true, out var next)) return false;
+        CommitState(next, false);
+        return true;
     }
 
-    private void NotifyResourceChanged(
-        ResourceType resourceType)
+    public bool TryApplyBuildingResources(BuildingData building)
     {
-        OnResourceChanged?.Invoke(
-            resourceType,
-            resources[resourceType]
-        );
+        if (building == null || !TryPrepareChange(building.RequiredResources,
+            building.GainedResources, false, out var next)) return false;
+        CommitState(next, false);
+        return true;
     }
 
-    // 건물 배치 시 자원 소비 및 생산을 적용하는 메서드
-    public void ApplyBuildingResource(
-        BuildingData buildingData)
+    public bool TryApplyComboResources(ComboDefinition combo)
     {
-        if (buildingData == null)
+        return combo != null && combo.Rewards.Count > 0 && TryAddResources(combo.Rewards);
+    }
+
+    public bool CanConsume(ResourceType resourceType, int amount)
+    {
+        return CanAffordResources(new[] { new ResourceAmount(resourceType, amount) });
+    }
+
+    public bool Consume(ResourceType resourceType, int amount)
+    {
+        return TryConsumeResources(new[] { new ResourceAmount(resourceType, amount) });
+    }
+
+    public void Add(ResourceType resourceType, int amount)
+    {
+        if (!TryAddResources(new[] { new ResourceAmount(resourceType, amount) }))
+            Debug.LogWarning("Invalid resource update was rejected.", this);
+    }
+
+    // Compatibility entry point used by the existing BuildingPlacement.
+    public void ApplyBuildingResource(BuildingData buildingData)
+    {
+        if (buildingData == null) return;
+        if (!TryApplyBuildingResources(buildingData))
+            Debug.LogWarning("Building resource transaction was rejected.", this);
+    }
+
+    public ResourceAmount[] CaptureResourceState()
+    {
+        EnsureInitialized();
+        var snapshot = new ResourceAmount[ResourceTypes.Length];
+        for (int i = 0; i < ResourceTypes.Length; i++)
+            snapshot[i] = new ResourceAmount(ResourceTypes[i], resources[ResourceTypes[i]]);
+        return snapshot;
+    }
+
+    public bool TryRestoreResources(IReadOnlyList<ResourceAmount> snapshot)
+    {
+        EnsureInitialized();
+        // A captured state may contain signed values from legacy Add.
+        // Restore does not change the stage's retry baseline.
+        if (!TryReadAmounts(snapshot, true, true, out var next)) return false;
+        CommitState(next, true);
+        return true;
+    }
+
+    private bool TryPrepareChange(IReadOnlyList<ResourceAmount> costs,
+        IReadOnlyList<ResourceAmount> gains, bool allowSignedGains,
+        out Dictionary<ResourceType, int> next)
+    {
+        EnsureInitialized();
+        next = null;
+        if (!TryReadAmounts(costs, false, false, out var costMap)
+            || !TryReadAmounts(gains, allowSignedGains, false, out var gainMap)) return false;
+
+        var candidate = new Dictionary<ResourceType, int>();
+        foreach (ResourceType type in ResourceTypes)
         {
-            return;
+            costMap.TryGetValue(type, out int cost);
+            gainMap.TryGetValue(type, out int gain);
+            int current = resources[type];
+            // Rewards from this build cannot pay its own upfront costs.
+            if (cost > 0 && current < cost) return false;
+            long value = (long)current - cost + gain;
+            if (value < int.MinValue || value > int.MaxValue) return false;
+            candidate.Add(type, (int)value);
         }
+        next = candidate;
+        return true;
+    }
 
-        Consume(
-            buildingData.ConsumeResource,
-            buildingData.ConsumeAmount
-        );
+    private static bool TryReadAmounts(IReadOnlyList<ResourceAmount> amounts,
+        bool allowNegative, bool requireAll,
+        out Dictionary<ResourceType, int> result)
+    {
+        result = null;
+        if (amounts == null || (requireAll && amounts.Count != ResourceTypes.Length)) return false;
+        var candidate = new Dictionary<ResourceType, int>();
+        foreach (ResourceAmount amount in amounts)
+        {
+            int code = (int)amount.Resource;
+            if (code < 0 || code >= ResourceTypes.Length
+                || (!allowNegative && amount.Amount < 0)
+                || candidate.ContainsKey(amount.Resource)) return false;
+            candidate.Add(amount.Resource, amount.Amount);
+        }
+        result = candidate;
+        return true;
+    }
 
-        Add(
-            buildingData.ProduceResource,
-            buildingData.ProduceAmount
-        );
+    private void CommitState(Dictionary<ResourceType, int> next, bool notifyAll)
+    {
+        var changed = new List<ResourceType>();
+        foreach (ResourceType type in ResourceTypes)
+            if (notifyAll || resources[type] != next[type]) changed.Add(type);
+
+        // Publish only after all five resource values have been committed.
+        resources = next;
+        if (changed.Count == 0) return;
+        foreach (ResourceType type in changed)
+            OnResourceChanged?.Invoke(type, next[type]);
+        OnResourcesChanged?.Invoke();
     }
 }
