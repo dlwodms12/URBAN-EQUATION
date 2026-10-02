@@ -84,6 +84,19 @@ History는 해당 Session에 연결되어 있어야 합니다. 새 Game 씬 초�
 
 ## 검증
 
+### 2026-10-03 비활성화 EditMode 테스트 수정
+
+사용자가 `DisablingFlowBlocksInputAndReenablingRestoresItsPlayingState`의 911행에서 입력 게이트가 false가 되지 않아 실패했다고 보고했고, 기존 Prototype 정상 동작은 확인했습니다.
+이 테스트는 일반 MonoBehaviour의 `OnDisable`/`OnEnable`이 EditMode의 `SetActive`에서도 자동 실행된다고 가정했습니다.
+Unity 문서는 일반 MonoBehaviour 이벤트가 기본적으로 런타임에서 실행된다고 설명합니다: https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ExecuteAlways.html.
+이 문서와 실패 위치/콜백 코드를 근거로 EditMode 호출 가정 문제로 판단했습니다. 실제 Unity 재실행으로 확인한 진단은 아닙니다.
+
+기존 fixture의 `Lifecycle` 도우미로 `SetActive(false/true)` 후 `OnDisable`/`OnEnable`을 명시적으로 호출하도록 수정했습니다.
+활성 상태, 입력 차단, 비활성 Flow 명령 거부, 직접 건설 요청 거부, 재활성화 입력 복귀 및 Clear 알림 1회 조건을 유지/확인합니다.
+런타임 핸들러는 구독 중복 방지 및 같은 게이트 값 적용 시 조기 반환이 있어 Unity가 먼저 호출하는 경우에도 중복 처리하지 않습니다.
+테스트를 위해 런타임에 ExecuteAlways를 추가하지 않았으며, 런타임 C#/씬/프리팹/meta/assembly는 변경하지 않았습니다.
+같은 `codex/phase3i-game-flow` 브랜치와 Draft PR #9에 반영합니다. 테스트 수는 195개 그대로이며 사용자 재실행 확인 대기입니다.
+
 기존 155개 + 신규 `GameFlowContractTests` 40개 = 전체 **195개**.
 기존 8개 테스트 클래스·assembly·meta는 수정하지 않았습니다.
 신규 테스트는 실제 기본 저장 경로, 실제 씬 로드, Application.Quit을 호출하지 않으며 Inspector 수정 없이 실행됩니다.

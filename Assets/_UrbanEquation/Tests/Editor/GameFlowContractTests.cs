@@ -908,9 +908,17 @@ public class GameFlowContractTests
     {
         FlowContext fixture = FlowFixture(); Playing(fixture);
         fixture.Flow.gameObject.SetActive(false);
+        // Ordinary MonoBehaviour callbacks are not automatically dispatched in EditMode.
+        // Explicit calls also check handlers that are safe if Unity already dispatched them.
+        Lifecycle(fixture.Flow, "OnDisable");
+        Assert.That(fixture.Flow.gameObject.activeInHierarchy, Is.False);
         Assert.That(Get(fixture.Game.Session, "GameplayEnabled"), Is.False);
         Assert.That(Command(fixture.Flow, "TryRequestPause"), Is.False);
+        object[] build = { 1, Vector2Int.zero, null, null };
+        Assert.That(Call(fixture.Game.Session, "TryCommitBuild", build), Is.False);
         fixture.Flow.gameObject.SetActive(true);
+        Lifecycle(fixture.Flow, "OnEnable");
+        Assert.That(fixture.Flow.gameObject.activeInHierarchy, Is.True);
         Assert.That(Get(fixture.Game.Session, "GameplayEnabled"), Is.True);
         int clearNotifications = 0;
         Watch(fixture.Flow, "OnStateChanged", () => { if (Screen(fixture) == "StageClear") clearNotifications++; });

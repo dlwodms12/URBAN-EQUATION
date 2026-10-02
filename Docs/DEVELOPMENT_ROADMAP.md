@@ -78,5 +78,8 @@ Console 컴파일 오류 없음 → Test Runner 검색/필터 해제 → EditMod
 Inspector 변경 없이 테스트 및 기존 Prototype 검증이 가능합니다.
 이 환경에는 Unity/C# 컴파일러가 없어 새 3-I 컴파일·테스트·Prototype 직접 실행은 하지 못했습니다.
 정적 점검과 원격 파일 반영 확인을 수행했으며 실제 Unity 실행 검증은 사용자 확인 대기입니다.
+2026-10-03T06:50:17+09:00: 사용자가 비활성화 테스트 1개 실패와 Prototype 정상 동작을 보고했습니다.
+EditMode에서 일반 MonoBehaviour 콜백의 자동 호출을 가정한 테스트를 수정하여 Lifecycle 도우미로 OnDisable/OnEnable을 명시적으로 호출하고, 직접 건설 거부도 확인하도록 했습니다.
+같은 브랜치/PR #9의 최신 커밋을 받은 뒤 실패 항목 및 전체195개 재실행을 확인합니다. 3-I 검증 완료로 처리하지 않습니다.
 다음 개발은 3-I 검증 완료 후 **3-J: BuildingData 15종 및 실제 Stage 1/2 데이터·전체 루프 통합**입니다.
 Art 폴더를 만들지 않고 Fonts/Materials/Sprite 및 임시 Assets/ScriptableObjects 위치를 유지합니다.
