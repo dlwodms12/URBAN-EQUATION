@@ -32,6 +32,29 @@ public class BuildingPlacement : MonoBehaviour
     private Tile currentTile;
 
     public event Action<int, int> OnBuildingCountChanged;
+    public event Action OnBuildingAvailabilityChanged;
+
+    private void OnEnable()
+    {
+        if (resourceManager != null) resourceManager.OnResourcesChanged += HandleResourcesChanged;
+    }
+
+    private void OnDisable()
+    {
+        if (resourceManager != null) resourceManager.OnResourcesChanged -= HandleResourcesChanged;
+        selectedBuilding = null;
+        DestroyPreview();
+    }
+
+    private void HandleResourcesChanged() => OnBuildingAvailabilityChanged?.Invoke();
+
+    public bool CanSelectBuilding(int buildingCode)
+    {
+        if (buildingDatabase == null || resourceManager == null || GetRemainingCount(buildingCode) <= 0)
+            return false;
+        BuildingData building = buildingDatabase.GetBuilding(buildingCode);
+        return building != null && resourceManager.CanAffordBuilding(building);
+    }
 
     private readonly Dictionary<int, int> maxBuildingCounts =
     new Dictionary<int, int>
@@ -58,6 +81,7 @@ public class BuildingPlacement : MonoBehaviour
 
     public void StartBuildingDrag(int buildingCode)
     {
+        if (!CanSelectBuilding(buildingCode)) return;
         BuildingData building =
             buildingDatabase.GetBuilding(buildingCode);
 
@@ -69,8 +93,8 @@ public class BuildingPlacement : MonoBehaviour
         if (GetRemainingCount(buildingCode) <= 0)
         {
             Debug.Log(
-                $"{building.BuildingName}Àº(´Â) " +
-                "´õ ÀÌ»ó °Ç¼³ÇÒ ¼ö ¾ø½À´Ï´Ù."
+                $"{building.BuildingName}ì€(ëŠ”) " +
+                "ë” ì´ìƒ ê±´ì„¤í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -79,7 +103,7 @@ public class BuildingPlacement : MonoBehaviour
         selectedBuilding = building;
 
         Debug.Log(
-            $"µå·¡±× ½ÃÀÛ: " +
+            $"ë“œëž˜ê·¸ ì‹œìž‘: " +
             $"{building.BuildingCode} / " +
             $"{building.BuildingName}"
         );
@@ -111,8 +135,8 @@ public class BuildingPlacement : MonoBehaviour
         if (buildingPrefab == null)
         {
             Debug.LogError(
-                "BuildingPlacement¿¡ " +
-                "BuildingPrefabÀÌ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "BuildingPlacementì— " +
+                "BuildingPrefabì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -222,9 +246,7 @@ public class BuildingPlacement : MonoBehaviour
             return;
         }
 
-        Destroy(
-            previewBuilding.gameObject
-        );
+        DestroyGenerated(previewBuilding.gameObject);
 
         previewBuilding = null;
     }
@@ -267,8 +289,8 @@ public class BuildingPlacement : MonoBehaviour
                 selectedBuilding.BuildingCode) <= 0)
         {
             Debug.Log(
-                $"{selectedBuilding.BuildingName}Àº(´Â) " +
-                "´õ ÀÌ»ó °Ç¼³ÇÒ ¼ö ¾ø½À´Ï´Ù."
+                $"{selectedBuilding.BuildingName}ì€(ëŠ”) " +
+                "ë” ì´ìƒ ê±´ì„¤í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -277,20 +299,22 @@ public class BuildingPlacement : MonoBehaviour
         if (tile.IsOccupied)
         {
             Debug.Log(
-                "ÀÌ¹Ì °Ç¹°ÀÌ Á¸ÀçÇÏ´Â Å¸ÀÏÀÔ´Ï´Ù."
+                "ì´ë¯¸ ê±´ë¬¼ì´ ì¡´ìž¬í•˜ëŠ” íƒ€ì¼ìž…ë‹ˆë‹¤."
             );
 
             return;
         }
 
-        if (!resourceManager.CanConsume(
-                selectedBuilding.ConsumeResource,
-                selectedBuilding.ConsumeAmount))
+        // Legacy tiles have no TileData. Production data must satisfy tile constraints.
+        if ((tile.Data != null && !tile.CanAcceptBuilding(selectedBuilding))
+            || (tile.Data == null && selectedBuilding.UsesResourceLists)) return;
+
+        if (!resourceManager.CanAffordBuilding(selectedBuilding))
         {
             Debug.Log(
-                $"ÀÚ¿øÀÌ ºÎÁ·ÇÏ¿© " +
-                $"{selectedBuilding.BuildingName}À»(¸¦) " +
-                $"°Ç¼³ÇÒ ¼ö ¾ø½À´Ï´Ù."
+                $"ìžì›ì´ ë¶€ì¡±í•˜ì—¬ " +
+                $"{selectedBuilding.BuildingName}ì„(ë¥¼) " +
+                $"ê±´ì„¤í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -311,22 +335,27 @@ public class BuildingPlacement : MonoBehaviour
             tile.Coordinate
         );
 
-        tile.SetBuilding(
-            building
-        );
+        if (!tile.TrySetBuilding(building))
+        {
+            DestroyGenerated(building.gameObject);
+            return;
+        }
+
+        if (!resourceManager.TryApplyBuildingResourcesDeferred(selectedBuilding, out Action publishResources))
+        {
+            tile.ClearBuilding();
+            return;
+        }
 
         int buildingCode =
             selectedBuilding.BuildingCode;
 
         buildingCounts[buildingCode]--;
+        publishResources();
 
         OnBuildingCountChanged?.Invoke(
             buildingCode,
             buildingCounts[buildingCode]
-        );
-
-        resourceManager.ApplyBuildingResource(
-            selectedBuilding
         );
 
         comboManager.CheckCombos(
@@ -336,7 +365,7 @@ public class BuildingPlacement : MonoBehaviour
         stageManager.CheckStageClear();
 
         Debug.Log(
-            $"°Ç¹° ¹èÄ¡: " +
+            $"ê±´ë¬¼ ë°°ì¹˜: " +
             $"{selectedBuilding.BuildingCode} " +
             $"at {tile.Coordinate}"
         );
@@ -380,5 +409,12 @@ public class BuildingPlacement : MonoBehaviour
         selectedBuilding = null;
 
         DestroyPreview();
+    }
+
+    private static void DestroyGenerated(GameObject value)
+    {
+        value.SetActive(false);
+        if (Application.isPlaying) Destroy(value);
+        else DestroyImmediate(value);
     }
 }

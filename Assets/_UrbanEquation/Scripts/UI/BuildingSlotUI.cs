@@ -34,7 +34,7 @@ public class BuildingSlotUI :
         if (button == null)
         {
             Debug.LogError(
-                $"{gameObject.name}¿¡ Button ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù."
+                $"{gameObject.name}ì— Button ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -44,6 +44,7 @@ public class BuildingSlotUI :
         {
             buildingPlacement.OnBuildingCountChanged +=
                 HandleBuildingCountChanged;
+            buildingPlacement.OnBuildingAvailabilityChanged += HandleBuildingAvailabilityChanged;
         }
     }
 
@@ -58,22 +59,25 @@ public class BuildingSlotUI :
         {
             buildingPlacement.OnBuildingCountChanged -=
                 HandleBuildingCountChanged;
+            buildingPlacement.OnBuildingAvailabilityChanged -= HandleBuildingAvailabilityChanged;
         }
     }
 
     public void OnPointerDown(
         PointerEventData eventData)
     {
+        if (eventData.button != PointerEventData.InputButton.Left
+            || buildingPlacement == null || !buildingPlacement.CanSelectBuilding(buildingCode)) return;
         Debug.Log(
-            $"µå·¡±× ½ÃÀÛ: {gameObject.name} / " +
-            $"°Ç¹° ÄÚµå: {buildingCode}"
+            $"ë“œëž˜ê·¸ ì‹œìž‘: {gameObject.name} / " +
+            $"ê±´ë¬¼ ì½”ë“œ: {buildingCode}"
         );
 
         if (buildingPlacement == null)
         {
             Debug.LogError(
-                $"{gameObject.name}ÀÇ " +
-                "BuildingPlacement°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                $"{gameObject.name}ì˜ " +
+                "BuildingPlacementê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -89,8 +93,8 @@ public class BuildingSlotUI :
         if (buildingDatabase == null)
         {
             Debug.LogError(
-                $"{gameObject.name}ÀÇ " +
-                "BuildingDatabase°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                $"{gameObject.name}ì˜ " +
+                "BuildingDatabaseê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -104,8 +108,8 @@ public class BuildingSlotUI :
         if (building == null)
         {
             Debug.LogError(
-                $"{gameObject.name}¿¡¼­ " +
-                $"°Ç¹° ÄÚµå¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù: {buildingCode}"
+                $"{gameObject.name}ì—ì„œ " +
+                $"ê±´ë¬¼ ì½”ë“œë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤: {buildingCode}"
             );
 
             return;
@@ -147,6 +151,12 @@ public class BuildingSlotUI :
         );
     }
 
+    private void HandleBuildingAvailabilityChanged()
+    {
+        if (buildingPlacement != null)
+            UpdateCountUI(buildingPlacement.GetRemainingCount(buildingCode));
+    }
+
     private void UpdateCountUI(
         int remainingCount)
     {
@@ -164,7 +174,8 @@ public class BuildingSlotUI :
         if (button != null)
         {
             button.interactable =
-                remainingCount > 0;
+                remainingCount > 0 && buildingPlacement != null
+                && buildingPlacement.CanSelectBuilding(buildingCode);
         }
     }
 }
