@@ -8,6 +8,9 @@ public class GameFlowDebugUI : MonoBehaviour
     [SerializeField] private GameSessionManager session;
     private string error;
     private Vector2 scroll;
+    private bool manualPlacement;
+    private Vector2Int selectedCoordinate;
+    public void SetManualPlacement(bool enabled) => manualPlacement = enabled;
     private delegate bool Command(out string error);
 
     public void Configure(SceneFlowManager manager, GameSessionManager gameSession)
@@ -71,6 +74,17 @@ public class GameFlowDebugUI : MonoBehaviour
                 if (session != null)
                 {
                     GUILayout.Label("Stage " + flow.SelectedStageNumber);
+                    if (manualPlacement)
+                    {
+                        GUILayout.Label("타일 선택 (위쪽 = 북쪽 +Z): " + selectedCoordinate);
+                        for (int y = session.Board.Height - 1; y >= 0; y--)
+                        {
+                            GUILayout.BeginHorizontal();
+                            for (int x = 0; x < session.Board.Width; x++)
+                                if (GUILayout.Button(x + "," + y)) selectedCoordinate = new Vector2Int(x, y);
+                            GUILayout.EndHorizontal();
+                        }
+                    }
                     foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType)))
                         GUILayout.Label(type + ": " + session.Resources.GetResource(type));
                     var cards = new List<BuildingCardState>(session.Hand.Cards);
@@ -78,13 +92,23 @@ public class GameFlowDebugUI : MonoBehaviour
                     {
                         GUI.enabled = session.Hand.IsCardAvailable(card.CardId);
                         if (GUILayout.Button("건설 " + card.CardId + ": " + card.Building.BuildingName))
-                            BuildFirstAvailable(card.CardId);
+                        {
+                            if (manualPlacement)
+                                session.TryCommitBuild(card.CardId, selectedCoordinate, out _, out error);
+                            else BuildFirstAvailable(card.CardId);
+                        }
                     }
                     GUI.enabled = session.History.CanUndo;
                     if (GUILayout.Button("Undo")) Run(session.History.TryUndo);
                     GUI.enabled = session.Stage.NextStageAvailable;
                     if (GUILayout.Button("NEXT STAGE")) Run(flow.TryCompleteStage);
                     GUI.enabled = true;
+                    ComboResult presentation = session.Combos == null ? null : session.Combos.CurrentPresentation;
+                    if (presentation != null)
+                    {
+                        GUILayout.Label("콤보: " + presentation.ComboName + " / " + presentation.Description);
+                        if (GUILayout.Button("다음 콤보 표시")) session.Combos.TryCompletePresentation(presentation);
+                    }
                 }
                 if (GUILayout.Button("중단 / ESC")) Run(flow.TryRequestPause);
                 break;
