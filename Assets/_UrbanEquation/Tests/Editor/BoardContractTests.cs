@@ -79,6 +79,17 @@ public class BoardContractTests
     private static Component Tile(object board, int x, int z)
         => (Component)Call(board, "GetTile", new Vector2Int(x, z));
 
+    private static void AssertWorldPosition(Vector3 actual, Vector3 expected)
+    {
+        // Transform conversions may introduce tiny floating-point rounding errors.
+        const float tolerance = 0.00001f;
+        float distance = Vector3.Distance(actual, expected);
+        Assert.That(distance, Is.LessThanOrEqualTo(tolerance),
+            $"Expected: ({expected.x:R}, {expected.y:R}, {expected.z:R}); " +
+            $"Actual: ({actual.x:R}, {actual.y:R}, {actual.z:R}); " +
+            $"Distance: {distance:R}; tolerance: {tolerance:R}");
+    }
+
     [TearDown]
     public void TearDown()
     {
@@ -106,7 +117,7 @@ public class BoardContractTests
         Component northWest = Tile(board, 0, 2);
         Assert.That(Get(northWest, "Data"), Is.SameAs(grass));
         Assert.That(northWest.name, Does.StartWith("Grass template"));
-        Assert.That(northWest.transform.position, Is.EqualTo(new Vector3(10f, 2f, -2f)));
+        AssertWorldPosition(northWest.transform.position, new Vector3(10f, 2f, -2f));
         Assert.That(Get(Tile(board, 1, 1), "Data"), Is.SameAs(asphalt));
         Assert.That(Get(Tile(board, 1, 0), "Data"), Is.SameAs(grass));
         Assert.That(Call(board, "GetTile", new Vector2Int(2, 0)), Is.Null);
@@ -253,7 +264,7 @@ public class BoardContractTests
         Assert.That(Get(board, "Width"), Is.EqualTo(8));
         Assert.That(Get(board, "Height"), Is.EqualTo(8));
         Assert.That(Get(Tile(board, 7, 7), "Data"), Is.Null);
-        Assert.That(Tile(board, 7, 7).transform.position, Is.EqualTo(new Vector3(7f, 0f, 7f)));
+        AssertWorldPosition(Tile(board, 7, 7).transform.position, new Vector3(7f, 0f, 7f));
         Call(board, "ClearBoard");
         Assert.That(Get(board, "HasBoard"), Is.False);
         Assert.That(Get(board, "Width"), Is.EqualTo(0));

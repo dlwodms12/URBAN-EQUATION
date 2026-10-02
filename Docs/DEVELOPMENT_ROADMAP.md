@@ -38,7 +38,9 @@
 기존 Prototype 정상 동작을 확인했습니다. 3-A를 완료 처리했습니다.
 Art 폴더는 새로 만들지 않고 현재 Fonts/Materials/Sprite 위치로 계속 진행합니다.
 Phase 3-B 코드 및 BoardContractTests 9개 작성, 실행 환경에 Unity가 없어 새 테스트는 실행 대기입니다.
-기존 DataContractTests 8개를 포함한 전체 17개 테스트 및 Prototype 회귀 검증 후 3-B를 완료 처리합니다.
+사용자가 Console 무오류 및 Prototype 정상 동작을 확인했으며, 전체 17개 중 월드 좌표 정확 비교 1개가 실패했습니다.
+좌표 테스트를 거리 오차 0.00001 이내 비교와 정밀 진단 메시지로 수정했습니다. 해당 테스트 재실행 대기입니다.
+모든 테스트 통과 확인 후 3-B를 완료 처리합니다.
 그다음은 Phase 3-C(자원)입니다.
 본 개발용 BuildingData 15종·콤보 표·Stage 1/2 asset 입력 및 프리팹 연결은 아직 수행하지 않았습니다.
 기존 `Assets/ScriptableObjects`의 데이터는 대체 런타임과 새 데이터 연결이 끝날 때까지 유지합니다.
