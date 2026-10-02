@@ -154,6 +154,106 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    public bool TryCaptureBuildings(out BuildingStateSnapshot[] placements, out string error)
+    {
+        placements = new BuildingStateSnapshot[0];
+        error = null;
+        if (tiles == null) { error = "Cannot capture an uninitialized board."; return false; }
+        var captured = new List<BuildingStateSnapshot>();
+        foreach (Tile tile in tiles)
+        {
+            if (tile == null) { error = "Board contains a missing tile."; return false; }
+            if (!tile.IsOccupied) continue;
+            BuildingInstance building = tile.Building;
+            if (building.Data == null || building.Coordinate != tile.Coordinate)
+            { error = "Board contains an invalid building."; return false; }
+            captured.Add(new BuildingStateSnapshot(tile.Coordinate, building.Data));
+        }
+        placements = captured.ToArray();
+        return true;
+    }
+
+    internal sealed class PreparedBuildingRestore : IDisposable
+    {
+        private readonly GameObject stagingRoot;
+        private readonly Action apply;
+        private bool applied;
+        internal PreparedBuildingRestore(GameObject root, Action commit) { stagingRoot = root; apply = commit; }
+        internal void Apply()
+        {
+            if (applied) throw new InvalidOperationException("Board restore was already applied.");
+            apply();
+            applied = true;
+        }
+        public void Dispose()
+        {
+            if (stagingRoot != null) DestroyObject(stagingRoot);
+        }
+    }
+
+    internal bool TryPrepareBuildingRestore(IReadOnlyList<BuildingStateSnapshot> placements,
+        BuildingInstance prefab, out PreparedBuildingRestore operation, out string error)
+    {
+        operation = null;
+        error = null;
+        if (tiles == null || placements == null || prefab == null)
+        { error = "Building restore requires a board, placements and root prefab."; return false; }
+        foreach (Tile tile in tiles)
+            if (tile == null) { error = "Board contains a missing tile."; return false; }
+        var seen = new HashSet<Vector2Int>();
+        var targetTiles = new List<Tile>();
+        foreach (BuildingStateSnapshot state in placements)
+        {
+            if (state == null || state.Building == null || state.Building.VisualPrefab == null
+                || state.BuildingCode != state.Building.BuildingCode || !seen.Add(state.Coordinate))
+            { error = "Snapshot contains a missing, changed or duplicate building definition."; return false; }
+            Tile tile = GetTile(state.Coordinate);
+            if (tile == null || (tile.Data != null && !state.Building.CanBuildOn(tile.Data.TileType))
+                || (tile.Data == null && state.Building.UsesResourceLists))
+            { error = "Snapshot building does not match the board's tiles."; return false; }
+            var errors = new List<string>();
+            state.Building.Validate(errors);
+            if (errors.Count > 0) { error = string.Join("; ", errors); return false; }
+            targetTiles.Add(tile);
+        }
+
+        var root = new GameObject("UndoBuildingCandidates");
+        root.SetActive(false);
+        root.transform.SetParent(transform, false);
+        var buildings = new List<BuildingInstance>();
+        try
+        {
+            for (int i = 0; i < placements.Count; i++)
+            {
+                BuildingInstance building = Instantiate(prefab, root.transform);
+                building.transform.position = targetTiles[i].transform.position;
+                building.transform.rotation = Quaternion.identity;
+                building.Initialize(placements[i].Building, placements[i].Coordinate);
+                buildings.Add(building);
+            }
+        }
+        catch (Exception exception)
+        {
+            DestroyObject(root);
+            error = "Could not prepare restored buildings: " + exception.Message;
+            return false;
+        }
+        operation = new PreparedBuildingRestore(root, () =>
+        {
+            // This is a restore, not a retry: keep the combo/history ownership scope.
+            foreach (Tile tile in tiles) { tile.ClearBuilding(); tile.SetHighlight(false); }
+            for (int i = 0; i < buildings.Count; i++)
+            {
+                BuildingInstance building = buildings[i];
+                Tile tile = targetTiles[i];
+                building.transform.SetParent(tile.transform, true);
+                tile.TrySetBuilding(building);
+                building.gameObject.SetActive(true);
+            }
+        });
+        return true;
+    }
+
     public void ResetBoard()
     {
         if (tiles == null) return;

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Building and combo commit boundary. Goals/history are attached in subsequent phases.
+// Building/combo completion and turn restore boundary. Goal evaluation is Phase 3-G.
 public class GameSessionManager : MonoBehaviour
 {
     [SerializeField] private BoardManager boardManager;
@@ -10,12 +10,20 @@ public class GameSessionManager : MonoBehaviour
     [SerializeField] private BuildingHandManager buildingHand;
     [SerializeField] private BuildingInstance buildingPrefab;
     [SerializeField] private ComboManager comboManager;
+    [SerializeField] private TurnHistoryManager turnHistory;
+    [SerializeField] private StageManager stageManager;
     private bool committing;
 
     public BoardManager Board => boardManager;
     public ResourceManager Resources => resourceManager;
     public BuildingHandManager Hand => buildingHand;
     public BuildingInstance BuildingPrefab => buildingPrefab;
+    public ComboManager Combos => comboManager;
+    public TurnHistoryManager History => turnHistory;
+    public bool IsBusy => committing;
+    public long ConfigurationVersion { get; private set; }
+    public event Action OnStateRestoring;
+    public event Action OnStateRestored;
     public IReadOnlyList<ComboResult> LastComboResults { get; private set; }
         = Array.AsReadOnly(new ComboResult[0]);
     public event Action<BuildingInstance, BuildingCardState> OnBuildingCommitted;
@@ -25,6 +33,8 @@ public class GameSessionManager : MonoBehaviour
     {
         if (committing) throw new InvalidOperationException("Cannot reconfigure during a build.");
         comboManager = manager;
+        ConfigurationVersion++;
+        if (turnHistory != null) turnHistory.NotifyConfigurationChanged();
     }
 
     public void Configure(BoardManager board, ResourceManager resources,
@@ -35,11 +45,26 @@ public class GameSessionManager : MonoBehaviour
         resourceManager = resources;
         buildingHand = hand;
         buildingPrefab = prefab;
+        ConfigurationVersion++;
+        if (turnHistory != null) turnHistory.NotifyConfigurationChanged();
+    }
+
+    internal void AttachHistory(TurnHistoryManager history, StageManager stage)
+    {
+        turnHistory = history;
+        stageManager = stage;
+        ConfigurationVersion++;
+    }
+
+    internal void DetachHistory(TurnHistoryManager history)
+    {
+        if (turnHistory == history) { turnHistory = null; ConfigurationVersion++; }
     }
 
     public bool CanBuild(int cardId, Vector2Int coordinate, out string error)
     {
         if (committing) { error = "A building transaction is already in progress."; return false; }
+        if (turnHistory != null && !turnHistory.CanRecordFor(this, out error)) return false;
         if (comboManager != null && (comboManager.Board != boardManager
             || comboManager.Resources != resourceManager || comboManager.IsResolving))
         { error = "Combo manager is busy or uses different board/resources."; return false; }
@@ -118,7 +143,8 @@ public class GameSessionManager : MonoBehaviour
             buildingHand.PublishHandChanged();
             publishCombos();
             OnBuildingCommitted?.Invoke(building, removed);
-            // Later phases evaluate goals and store completed-turn snapshots here.
+            // Phase 3-G evaluates goals before this completed-turn capture.
+            if (turnHistory != null) turnHistory.RecordCompletedTurn(this);
             OnBuildResolved?.Invoke(building, LastComboResults);
             return true;
         }
@@ -126,6 +152,68 @@ public class GameSessionManager : MonoBehaviour
         {
             // Success reparented the candidate; failure destroys the entire candidate subtree.
             if (stagingRoot != null) DestroyGenerated(stagingRoot);
+            committing = false;
+        }
+    }
+
+    internal bool TryRestoreTurn(GameStateSnapshot snapshot, Action applyHistory,
+        Action publishHistory, out string error)
+    {
+        error = null;
+        if (committing || snapshot == null || boardManager == null || resourceManager == null || buildingHand == null)
+        { error = "Cannot restore a turn in this session."; return false; }
+        committing = true;
+        BoardManager.PreparedBuildingRestore boardRestore = null;
+        try
+        {
+            if (!boardManager.TryPrepareBuildingRestore(snapshot.Buildings, buildingPrefab, out boardRestore, out error))
+                return false;
+            if (!resourceManager.TryPrepareResourceRestore(snapshot.Resources, out Action applyResources, out Action publishResources))
+            { error = "Snapshot resource state is invalid."; return false; }
+            if (!buildingHand.TryPrepareCardsRestore(snapshot.Cards, out Action applyCards, out Action publishCards, out error))
+                return false;
+            Action applyCombos = () => { }, publishCombos = () => { };
+            if (comboManager != null)
+            {
+                if (!comboManager.TryPrepareResultsRestore(snapshot.Combos, snapshot.Buildings,
+                    out applyCombos, out publishCombos, out error)) return false;
+            }
+            else if (snapshot.Combos.Count != 0)
+            { error = "Snapshot requires a combo manager."; return false; }
+            var recorded = new HashSet<ComboResult>(snapshot.Combos);
+            foreach (ComboResult result in snapshot.LastBuildCombos)
+                if (!recorded.Contains(result))
+                { error = "Last-build combo results are missing from the snapshot ledger."; return false; }
+            Action applyStage = () => { }, publishStage = () => { };
+            if (stageManager != null)
+            {
+                if (!stageManager.TryPrepareProgressRestore(snapshot.StageProgress, out applyStage, out publishStage))
+                { error = "Snapshot stage state is invalid."; return false; }
+            }
+            else if (snapshot.StageProgress != null)
+            { error = "Snapshot requires a stage manager."; return false; }
+
+            OnStateRestoring?.Invoke();
+            boardRestore.Apply();
+            applyResources();
+            applyCards();
+            applyCombos();
+            applyStage();
+            var last = new ComboResult[snapshot.LastBuildCombos.Count];
+            for (int i = 0; i < last.Length; i++) last[i] = snapshot.LastBuildCombos[i];
+            LastComboResults = Array.AsReadOnly(last);
+            applyHistory();
+            publishResources();
+            publishCards();
+            publishCombos();
+            publishStage();
+            publishHistory();
+            OnStateRestored?.Invoke();
+            return true;
+        }
+        finally
+        {
+            if (boardRestore != null) boardRestore.Dispose();
             committing = false;
         }
     }

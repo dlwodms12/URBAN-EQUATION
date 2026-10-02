@@ -14,7 +14,7 @@ public class ClearUI : MonoBehaviour
         if (clearText == null)
         {
             Debug.LogError(
-                "ClearUIÀÇ Clear Text°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "ClearUIì˜ Clear Textê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -28,7 +28,7 @@ public class ClearUI : MonoBehaviour
         if (stageManager == null)
         {
             Debug.LogError(
-                "ClearUIÀÇ StageManager°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "ClearUIì˜ StageManagerê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -36,6 +36,8 @@ public class ClearUI : MonoBehaviour
 
         stageManager.OnStageCleared +=
             ShowClearUI;
+        stageManager.OnStateChanged += RefreshState;
+        RefreshState();
     }
 
     private void OnDestroy()
@@ -44,6 +46,7 @@ public class ClearUI : MonoBehaviour
         {
             stageManager.OnStageCleared -=
                 ShowClearUI;
+            stageManager.OnStateChanged -= RefreshState;
         }
     }
 
@@ -56,7 +59,13 @@ public class ClearUI : MonoBehaviour
 
         clearText.gameObject.SetActive(true);
 
-        Debug.Log("Clear UI Ãâ·Â");
+        Debug.Log("Clear UI ì¶œë ¥");
+    }
+
+    private void RefreshState()
+    {
+        if (clearText != null && stageManager != null)
+            clearText.gameObject.SetActive(stageManager.IsCleared);
     }
 
     public void ResetUI()

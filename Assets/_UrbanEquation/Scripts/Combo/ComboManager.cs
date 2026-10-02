@@ -38,6 +38,7 @@ public class ComboManager : MonoBehaviour
     public BoardManager Board => boardManager;
     public ResourceManager Resources => resourceManager;
     public bool IsResolving => resolving;
+    public long ConfigurationVersion { get; private set; }
     public IReadOnlyList<ComboResult> Results { get { EnsureBindings(); return results.AsReadOnly(); } }
     public ComboResult CurrentPresentation { get { EnsureBindings(); return presentations.Current; } }
     public int PendingPresentationCount { get { EnsureBindings(); return presentations.PendingCount; } }
@@ -64,6 +65,7 @@ public class ComboManager : MonoBehaviour
         stateBoard = board;
         observedResetVersion = board.ResetVersion;
         ownerToken = new object();
+        ConfigurationVersion++;
         ClearComboState();
         EnsureBindings();
         return true;
@@ -205,6 +207,36 @@ public class ComboManager : MonoBehaviour
     public bool TryRestoreResults(IReadOnlyList<ComboResult> snapshot, out string error)
     {
         EnsureBindings();
+        if (!TryPrepareResultsRestore(snapshot, IsResultOnBoard,
+            out Action apply, out Action publish, out error)) return false;
+        apply();
+        publish();
+        return true;
+    }
+
+    internal bool TryPrepareResultsRestore(IReadOnlyList<ComboResult> snapshot,
+        IReadOnlyList<BuildingStateSnapshot> restoredBuildings,
+        out Action apply, out Action publish, out string error)
+    {
+        EnsureBindings();
+        var buildings = new Dictionary<Vector2Int, BuildingStateSnapshot>();
+        foreach (BuildingStateSnapshot building in restoredBuildings)
+            buildings.Add(building.Coordinate, building);
+        return TryPrepareResultsRestore(snapshot, result =>
+        {
+            Vector2Int direction = result.AdjacentCoordinate - result.SourceCoordinate;
+            return Math.Abs(direction.x) + Math.Abs(direction.y) == 1
+                && buildings.TryGetValue(result.SourceCoordinate, out BuildingStateSnapshot a)
+                && buildings.TryGetValue(result.AdjacentCoordinate, out BuildingStateSnapshot b)
+                && a.BuildingCode == result.BuildingCodeA && b.BuildingCode == result.BuildingCodeB;
+        }, out apply, out publish, out error);
+    }
+
+    private bool TryPrepareResultsRestore(IReadOnlyList<ComboResult> snapshot,
+        Func<ComboResult, bool> isOnBoard, out Action apply, out Action publish, out string error)
+    {
+        apply = null;
+        publish = null;
         error = null;
         if (resolving || snapshot == null) { error = "Cannot restore this combo snapshot."; return false; }
         var next = new List<ComboResult>();
@@ -212,18 +244,22 @@ public class ComboManager : MonoBehaviour
         foreach (ComboResult result in snapshot)
         {
             if (result == null || result.OwnerToken != ownerToken || result.ResultId != next.Count + 1
-                || !IsResultOnBoard(result))
+                || !isOnBoard(result))
             { error = "Snapshot contains a foreign/invalid/out-of-order combo result."; return false; }
             string key = PairKey(result.SourceCoordinate, result.AdjacentCoordinate);
             if (pairs.ContainsKey(key)) { error = "Snapshot contains a duplicate building pair."; return false; }
             next.Add(result);
             pairs.Add(key, result);
         }
-        results.Clear(); results.AddRange(next);
-        appliedPairs.Clear();
-        foreach (var pair in pairs) appliedPairs.Add(pair.Key, pair.Value);
-        presentations.Clear();
-        OnResultsChanged?.Invoke();
+        apply = () =>
+        {
+            results.Clear(); results.AddRange(next);
+            appliedPairs.Clear();
+            foreach (var pair in pairs) appliedPairs.Add(pair.Key, pair.Value);
+            // Clear now, notify after the whole session has been restored.
+            presentations.ClearSilently();
+        };
+        publish = () => { OnPresentationCleared?.Invoke(); OnResultsChanged?.Invoke(); };
         return true;
     }
 
@@ -288,6 +324,7 @@ public class ComboManager : MonoBehaviour
             stateBoard = boardManager;
             observedResetVersion = boardManager == null ? 0 : boardManager.ResetVersion;
             ownerToken = new object();
+            ConfigurationVersion++;
             ClearComboState();
         }
         if (boardManager != null && observedResetVersion != boardManager.ResetVersion)
@@ -328,4 +365,3 @@ public class ComboManager : MonoBehaviour
         return $"{a.x}:{a.y}|{b.x}:{b.y}";
     }
 }
-
