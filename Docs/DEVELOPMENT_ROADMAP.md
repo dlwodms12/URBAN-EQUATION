@@ -1,7 +1,7 @@
 # URBAN EQUATION 개발 로드맵
 
 기준: 2026-10-01 수정 기획서(33페이지)와 사용자 확정 답변.
-작업 시작 전에 이 파일과 `Docs/PHASE3J_INTEGRATION.md`를 읽습니다.
+작업 시작 전에 이 파일과 `Docs/PHASE4A_PREFABS.md`를 읽습니다.
 상세 로드맵: `dlwodms12/LJE_GPT_Log`의 `memory/entries/MEM-20261001-0610-urban-equation-development-roadmap-v1.md`.
 
 ## 진행 순서
@@ -17,8 +17,11 @@
 - [x] Phase 3-G: 목표·랭크·NEXT STAGE (123개·Prototype 사용자 검증)
 - [x] Phase 3-H: 진행도·해금·최고 랭크 저장 (사용자 검증)
 - [x] Phase 3-I: Lobby/Game 화면 상태·New Game/Continue·Retry·Exit (195개·Prototype 사용자 검증)
-- [ ] Phase 3-J: 실제 BuildingData 15종·Stage 1/2 및 전체 루프 통합 (코드·48개 신규 테스트 작성, Unity 검증 대기)
-- [ ] Phase 4: Lobby/Game 실제 씬·프리팹·UI·최종 플레이 검증
+- [x] Phase 3-J: 실제 BuildingData15종·Stage1/2 전체루프 (전체테스트·Prototype·디버그 기능 사용자 검증 완료)
+- [ ] Phase 4-A: 공통 프리팹 (생성/연결 도구·표시 코드·26개 신규 테스트 작성, Unity 생성/검증 대기)
+- [ ] Phase 4-B: 최종 Main Game HUD·카드 상세·연출
+- [ ] Phase 4-C: Lobby/Game 실제 씬·메뉴·팝업
+- [ ] Phase 4-D: 최종 플레이 검증
 
 ## 확정 규칙
 
@@ -33,22 +36,22 @@
 
 ## 현재 위치와 검증 경계
 
-2026-10-03T06:59:51+09:00: 사용자가 전체195개 테스트 통과와 Prototype 정상 동작을 확인했습니다.
-3-I 비활성화 테스트 수정도 검증 완료로 기록하고 3-J를 진행합니다.
-현재 브랜치: **codex/phase3j-stage-data**, 기준 3-I 커밋 `f7ae185f60e885424668a65ce8afa26e7aef49b0`.
-변경/실행/해답: `Docs/PHASE3J_INTEGRATION.md`.
+2026-10-03T07:47:39+09:00: 사용자가 3-J 전체 테스트·기존 Prototype·디버그 게임 기능 동작을 확인하고 다음 작업과 상세 Unity 작업 안내를 요청했습니다.
+이번 메시지에 개수는 직접 재명시하지 않았으며 앞서 안내한 예상 전체243개에 대한 검증 확인으로 반영합니다.
+대형 사무실 B23001은 사용자 선택에 따라 기획서 표의 파일명 Building_House_Block을 연결합니다.
+현재 브랜치: **codex/phase4a-common-prefabs**, 기준J 커밋 `2a5f8d8be0cb7f0eafcd9ff7e32938a932fb650a`.
+Unity 작업과 파일별 Inspector 안내: **Docs/PHASE4A_PREFABS.md**.
 
-기획서의 건물15종 비용·획득·허용 타일, Stage1/2 카드·초기 자원·목표를 실제 asset으로 작성했습니다.
-GameContentData가 카탈로그 간 참조를 검증하고 GameBootstrap이 명시적 저장 경로로 초기화합니다.
-StageManager를 Session 연결 시점에 바인딩하여 첫 건설 전에도 입력 차단 상태를 공유합니다.
-Editor 메뉴 `Tools > Urban Equation > Stage 1-2 Debug`에서 임시 씬과 좌표 선택 디버그 UI로 전체 루프를 실행합니다.
-디버그 저장은 temporaryCachePath 하위 별도 파일입니다. 실제 Lobby/Game 씬과 최종 프리팹·UI는 Phase4입니다.
-타일 논리 데이터는 3종이며 외형은 기존 Tile 프리팹을 임시 공유합니다.
-실제 Stage1/2에 쓰이는 건물5종 외형만 연결하며 나머지10종 외형·카드 Sprite는 Phase4에서 연결합니다.
-기존 Prototype, Fonts/Materials/Sprite 및 Assets/ScriptableObjects를 유지합니다.
+Phase4-A 생성 메뉴는 새 타일3종·BuildingRoot·BuildingCard·ComboPopup 및 GameplayPrefabs.asset을 만들고 본개발 데이터 참조를 연결합니다.
+생성된 목적지 프리팹은 재생성하지 않으며 현재 편집 내용을 유지합니다. 참조와16개 이미지 import 설정은 재연결합니다.
+원래 Tile/Building 프리팹은 유지하며 새로운 BuildingRoot의 Visual Offset으로 Surface 위에 외형을 올립니다. 기존 기본값0으로 Prototype 동작을 유지합니다.
+카드 이미지15개와 콤보 이미지1개를 Sprite Single로 import하고 외부 pack 및 PNG/GUID는 유지합니다.
+ComboPopupUI는 이미 지급된 결과의 표시·위치·부호/색·페이드·순차 완료만 처리합니다. GameplayPrefabPreview는 카드 드래그/오버레이/콤보를 임시 씬에 연결합니다.
+Source와 도구는 작성했으며 **프리팹 asset 자체는 사용자 Unity에서 메뉴 실행 시 생성**됩니다. 아직 4-A 생성/import/Play 검증 완료로 기록하지 않습니다.
+기존 Prototype 씬/프리팹/테스트243개, Fonts/Materials/Sprite 및 Assets/ScriptableObjects는 유지합니다. 삭제/이동 없음.
+본 단계는 공통 프리팹이며 최종 HUD·호버는4-B, 실제Lobby/Game씬·메뉴·팝업은4-C, 최종 검증은4-D입니다.
 
-다음 확인: Unity 종료 → Fetch origin → **codex/phase3j-stage-data** 선택/최신 Pull → Unity 재실행.
-Console 컴파일 오류 없음 → Test Runner 검색/필터 해제 → EditMode Run All → 예상 전체 **243개**.
+다음 확인: Unity 종료 → 브랜치 최신 Pull → 재실행/컴파일 오류 없음 → Tools > Urban Equation > Phase 4A 메뉴1 생성 → 메뉴2 검증 → EditMode Run All **269개** → 메뉴3 미리보기/기존Prototype → 생성파일과meta·수정데이터 Commit/Push.
 
 | 테스트 클래스 | 예상 수 |
 |---|---:|
@@ -62,9 +65,9 @@ Console 컴파일 오류 없음 → Test Runner 검색/필터 해제 → EditMod
 | SaveContractTests | 32 |
 | GameFlowContractTests | 40 |
 | StageIntegrationContractTests | 48 |
-| 전체 | 243 |
+| PrefabContractTests | 26 |
+| 전체 | 269 |
 
-기존 Prototype 호환과 새 디버그 Stage1/2 플레이를 모두 확인합니다.
-이 환경에는 Unity/C# 컴파일러가 없어 3-J 컴파일·EditMode·플레이 실행을 직접 확인하지 못했습니다.
-asset 정적 검증, 독립 자원/배치 계산 및 원격 반영 확인과 Unity 실행 검증을 구분합니다.
-3-J 사용자 검증이 완료되면 Phase4로 진행합니다.
+새 테스트는 메모리에서 카드/타일/팝업을 생성하고 GUID OS임시 저장 경로를 정리합니다. 프로젝트 이미지 import/프리팹 파일 생성 메뉴를 자동 실행하지 않습니다.
+이 환경에는 Unity/C# 컴파일러가 없어 실제 컴파일·생성/import·EditMode·Play·화면 렌더링은 사용자 검증 대기입니다.
+정적 참조/구문/테스트 선언 집계 및 원격 반영을 확인합니다. 4-A 사용자 검증 후4-B로 진행합니다.
