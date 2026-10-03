@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ef16987120c425f89273402b5934131, type: 3}
   m_Name: T00002_Concrete
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   tileType: 1
   displayName: Concrete
-  tilePrefab: {fileID: 6621086933196487792, guid: b9edd198a5887214983418511b3b1617, type: 3}
+  tilePrefab: {fileID: 246710780118005408, guid: 38b3c043b53f9e743a877c2001b6613e, type: 3}

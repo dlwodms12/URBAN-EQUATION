@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ef16987120c425f89273402b5934131, type: 3}
   m_Name: T00003_Grass
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   tileType: 2
   displayName: Grass
-  tilePrefab: {fileID: 6621086933196487792, guid: b9edd198a5887214983418511b3b1617, type: 3}
+  tilePrefab: {fileID: 1919337055229720486, guid: 07582cce0259e6a49b55ad2933dbd0a7, type: 3}

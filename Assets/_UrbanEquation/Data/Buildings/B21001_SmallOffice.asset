@@ -11,11 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cebc08413787d4d4b863df02371a2e8a, type: 3}
   m_Name: B21001_SmallOffice
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   buildingCode: 21001
-  buildingName: "소형 사무실"
+  buildingName: "\uC18C\uD615 \uC0AC\uBB34\uC2E4"
   visualPrefab: {fileID: 7711623308285926411, guid: 8935a5e4af4bd994496fcd8b2338cb0f, type: 3}
-  cardImage: {fileID: 0}
+  cardImage: {fileID: 21300000, guid: f6c023ac318dec9479f9e8d88ed12018, type: 3}
   useResourceLists: 1
   requiredResources:
   - resource: 2

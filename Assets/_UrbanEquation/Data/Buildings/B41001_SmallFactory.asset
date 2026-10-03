@@ -11,11 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cebc08413787d4d4b863df02371a2e8a, type: 3}
   m_Name: B41001_SmallFactory
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   buildingCode: 41001
-  buildingName: "소형 공장"
+  buildingName: "\uC18C\uD615 \uACF5\uC7A5"
   visualPrefab: {fileID: 3319918821040778129, guid: a520474f707db444aae91b030252930d, type: 3}
-  cardImage: {fileID: 0}
+  cardImage: {fileID: 21300000, guid: b18f914fe25b4614b98eb5c0ceaea0cb, type: 3}
   useResourceLists: 1
   requiredResources:
   - resource: 4

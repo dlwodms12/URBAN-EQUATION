@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca3d3b28d7d51e8b77f7d23e39ba634, type: 3}
+  m_Name: GameplayPrefabs
+  m_EditorClassIdentifier: 
+  buildingCardPrefab: {fileID: 2185774399244996498, guid: 3c0fbe01bbfdc714592af63e96557d2c, type: 3}
+  comboPopupPrefab: {fileID: 5648023321505974381, guid: 35bf56716d9f82f4f9d13be6522e4589, type: 3}

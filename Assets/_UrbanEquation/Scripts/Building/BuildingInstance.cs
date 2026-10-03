@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class BuildingInstance : MonoBehaviour
 {
+    [SerializeField] private Vector3 visualOffset;
     public BuildingData Data { get; private set; }
 
     public Vector2Int Coordinate { get; private set; }
@@ -15,8 +16,8 @@ public class BuildingInstance : MonoBehaviour
         if (data == null)
         {
             Debug.LogError(
-                "BuildingInstance.Initialize()¿¡ " +
-                "BuildingData°¡ Àü´ŞµÇÁö ¾Ê¾Ò½À´Ï´Ù."
+                "BuildingInstance.Initialize()ì— " +
+                "BuildingDataê°€ ì „ë‹¬ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -44,8 +45,8 @@ public class BuildingInstance : MonoBehaviour
         if (visualPrefab == null)
         {
             Debug.LogWarning(
-                $"°Ç¹° ÄÚµå {Data.BuildingCode}¿¡ " +
-                "¿¬°áµÈ Visual PrefabÀÌ ¾ø½À´Ï´Ù."
+                $"ê±´ë¬¼ ì½”ë“œ {Data.BuildingCode}ì— " +
+                "ì—°ê²°ëœ Visual Prefabì´ ì—†ìŠµë‹ˆë‹¤."
             );
 
             return;
@@ -58,7 +59,7 @@ public class BuildingInstance : MonoBehaviour
             );
 
         currentVisual.transform.localPosition =
-            Vector3.zero;
+            visualOffset;
 
         currentVisual.transform.localRotation =
             Quaternion.Euler(0f, 180f, 0f);
