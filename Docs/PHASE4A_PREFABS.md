@@ -16,7 +16,7 @@
 2. Unity를 다시 실행해 Console의 컴파일 오류가 없는지 확인합니다.
 3. Play를 정지한 상태에서 상단 메뉴 **Tools > Urban Equation > Phase 4A > 1 Create Missing Prefabs and Bind Data**를 실행합니다.
 4. Console에 생성·연결 완료 메시지가 나타나면 **2 Validate Prefab Setup**을 실행합니다. 정상 메시지는 `Phase4-A Prefab Validation OK`입니다.
-5. Test Runner의 검색/필터를 해제하고 EditMode Run All을 실행합니다. 예상 전체 **272개**, 신규 클래스 **PrefabContractTests 29개**입니다. 메뉴 실행 전에도 테스트할 수 있으나 메뉴 실행 후 다시 확인하면 생성한 데이터 연결까지 검사됩니다.
+5. Test Runner의 검색/필터를 해제하고 EditMode Run All을 실행합니다. 예상 전체 **272개**, 신규 클래스 **PrefabContractTests 29개**입니다. 테스트는 생성 메뉴 실행 전에도 가능합니다. 실제로 생성한 프리팹·데이터 연결은 메뉴2로 별도 검사합니다.
 6. **3 Prefab Gameplay Preview**를 실행합니다. 현재 수정한 씬이 있다면 Unity 저장 확인창에서 저장하거나 취소할 수 있습니다. 미리보기는 임시 씬이며 새로운 정식 씬 파일을 저장할 필요가 없습니다.
 7. Game 탭의 해상도 메뉴에서 **1920×1080**을 선택하고 필요하면 Maximize On Play를 켭니다. Play/Continue와 안내 OK는 왼쪽 디버그 패널, 실제 카드 드래그는 하단 카드 목록에서 합니다.
 8. 아래 Inspector 확인과 플레이 확인을 마친 뒤 Stop을 누릅니다. GitHub Desktop에서 생성된 프리팹·데이터 변경·이미지 `.meta`를 함께 Commit/Push합니다.
@@ -78,6 +78,7 @@ Fonts/Materials/Sprite 현재 폴더를 유지하고 Art 폴더를 만들지 않
 4. BuildingRoot 자체에는 특정 건물 외형을 직접 넣지 않습니다. 런타임에 BuildingData의 Visual Prefab이 생성됩니다.
 5. Preview에서 건물이 Surface 속에 묻히거나 떠 보이는 경우, 새 BuildingRoot의 Visual Offset Y만 조금 조정합니다. 루트 Scale Y가0.1이므로 Visual Offset Y를0.1 변경하면 월드 높이는0.01 바뀝니다. 기존 Building.prefab은 편집하지 않습니다.
 6. `Assets/_UrbanEquation/Data/Buildings/`의 각 asset을 선택해 **Visual Prefab**과 **Card Image**가 비어 있지 않은지 확인합니다.
+7. 최신 수정 대상인 `B23001_LargeOffice.asset`을 별도로 선택하여 **Visual Prefab**이 외부 팩의 `Building_Skyscraper.prefab`, **Card Image**가 `Spr_Ui_BOffice_001`인지 확인합니다. B23001은 현재 Stage1/2 카드 목록에 없으므로 이 Inspector 확인과 메뉴2로 연결을 검사합니다.
 
 외형의 공통 경로는 `Assets/polyperfect/Low Poly Ultimate Pack/_T/Prefabs_T/Buildings_T/`입니다.
 아래 표의 이름에 `.prefab`을 붙입니다. 카드 이미지의 공통 경로는 `Assets/_UrbanEquation/Sprite/Building_Image/`이며 이름에 `.png`를 붙입니다.
