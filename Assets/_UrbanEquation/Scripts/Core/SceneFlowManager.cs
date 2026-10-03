@@ -22,6 +22,8 @@ public class SceneFlowManager : MonoBehaviour
         && catalog.TryGetStage(SelectedStageNumber, out StageData stage) ? stage : null;
     public StageResult Result { get; private set; }
     public bool CanContinue => State == GameFlowState.Lobby && saves != null && saves.CanContinue;
+    public bool CanResumeSavedGame => (State == GameFlowState.Lobby || State == GameFlowState.NewGameConfirmation)
+        && saves != null && saves.CanContinue;
     public bool CanNextStage => State == GameFlowState.StageClear && resultSaved
         && saves.PendingResult == null && SelectedStageNumber < StageCount
         && saves.Progress.IsStageUnlocked(SelectedStageNumber + 1);

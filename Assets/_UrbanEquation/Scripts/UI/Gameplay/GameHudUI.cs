@@ -25,7 +25,9 @@ public class GameHudUI : MonoBehaviour
     private SceneFlowManager flow;
     private BuildingPlacementController placement;
     private bool subscribed;
+    private bool screenBackdropVisible;
     public bool GameplayVisible => gameplayRoot != null && gameplayRoot.activeSelf;
+    public void SetScreenBackdropVisible(bool visible) { screenBackdropVisible = visible; RefreshAll(); }
 
     public void Bind(GameSessionManager game, SceneFlowManager screens, BuildingPlacementController controller, Camera camera)
     {
@@ -75,7 +77,9 @@ public class GameHudUI : MonoBehaviour
     {
         bool playing = isActiveAndEnabled && session != null && flow != null && flow.State == GameFlowState.Playing
             && session.GameplayEnabled;
-        if (gameplayRoot != null) gameplayRoot.SetActive(playing);
+        bool backdrop = screenBackdropVisible && isActiveAndEnabled && session != null && flow != null
+            && flow.Scene == GameFlowScene.Game && flow.State != GameFlowState.Unconfigured;
+        if (gameplayRoot != null) gameplayRoot.SetActive(playing || backdrop);
         if (pauseButton != null) pauseButton.interactable = playing;
         if (!playing) HideDetails();
         RefreshResources(); RefreshGoals();
