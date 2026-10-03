@@ -9,6 +9,20 @@ public class BuildingHandUI : MonoBehaviour
     [SerializeField] private Transform content;
     private BuildingHandManager subscribedHand;
     private readonly Dictionary<int, BuildingCardUI> views = new Dictionary<int, BuildingCardUI>();
+    private BuildingTooltipUI tooltip;
+
+    public void SetTooltip(BuildingTooltipUI details)
+    { tooltip = details; ConfigureHovers(); }
+    private void ConfigureHovers()
+    {
+        foreach (BuildingCardUI view in views.Values)
+        {
+            if (view == null) continue;
+            var hover = view.GetComponent<BuildingCardHoverUI>();
+            if (hover == null && tooltip != null) hover = view.gameObject.AddComponent<BuildingCardHoverUI>();
+            if (hover != null) hover.Configure(view,placement,tooltip);
+        }
+    }
 
     public void Bind(BuildingHandManager manager, BuildingPlacementController controller,
         BuildingCardUI prefab, Transform parent)
@@ -83,6 +97,7 @@ public class BuildingHandUI : MonoBehaviour
             view.transform.SetSiblingIndex(i);
             view.gameObject.SetActive(true);
         }
+        ConfigureHovers();
     }
 
     private void RefreshAvailability()
@@ -107,4 +122,3 @@ public class BuildingHandUI : MonoBehaviour
         else DestroyImmediate(view.gameObject);
     }
 }
-

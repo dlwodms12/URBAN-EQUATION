@@ -9,8 +9,10 @@ public class GameFlowDebugUI : MonoBehaviour
     private string error;
     private Vector2 scroll;
     private bool manualPlacement;
+    private bool hideWhilePlaying;
     private Vector2Int selectedCoordinate;
     public void SetManualPlacement(bool enabled) => manualPlacement = enabled;
+    public void SetGameplayPanelVisible(bool visible) => hideWhilePlaying = !visible;
     private delegate bool Command(out string error);
 
     public void Configure(SceneFlowManager manager, GameSessionManager gameSession)
@@ -34,6 +36,7 @@ public class GameFlowDebugUI : MonoBehaviour
             Run(flow.TryHandleEscape);
             Event.current.Use();
         }
+        if (hideWhilePlaying && flow.State == GameFlowState.Playing) return;
         GUILayout.BeginArea(new Rect(12, 12, 340, Screen.height - 24), GUI.skin.box);
         scroll = GUILayout.BeginScrollView(scroll);
         GUILayout.Label("URBAN EQUATION / " + flow.State);
