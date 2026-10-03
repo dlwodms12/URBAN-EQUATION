@@ -3,6 +3,10 @@ using UnityEngine;
 public class BuildingInstance : MonoBehaviour
 {
     [SerializeField] private Vector3 visualOffset;
+
+    [SerializeField, Min(0.01f)]
+    private float visualScaleMultiplier = 1f;
+
     public BuildingData Data { get; private set; }
 
     public Vector2Int Coordinate { get; private set; }
@@ -57,6 +61,9 @@ public class BuildingInstance : MonoBehaviour
                 visualPrefab,
                 transform
             );
+
+        //건물 모델 스케일에 공통 배율 적용
+        currentVisual.transform.localScale = visualPrefab.transform.localScale * visualScaleMultiplier;
 
         currentVisual.transform.localPosition =
             visualOffset;

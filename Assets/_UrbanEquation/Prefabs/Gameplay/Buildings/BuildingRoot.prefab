@@ -67,3 +67,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visualOffset: {x: 0, y: 0.3639998, z: 0}
+  visualScaleMultiplier: 0.3
