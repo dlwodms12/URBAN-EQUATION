@@ -73,7 +73,7 @@ Canvas는 Screen Space - Overlay, CanvasScaler는 Scale With Screen Size / Refer
 | Automatic Combo / Replay Combo | Gameplay/Automatic Combo·Combo Replay의 ComboPopupUI |
 | Board Details | Gameplay의 BoardDetailsUI |
 
-참조はすべて메뉴가 자동 연결합니다. 비어 있으면 해당 자식 컴포넌트를 슬롯에 드래그해 연결하고 저장 후 메뉴2를 실행합니다.
+모든 참조는 메뉴가 자동 연결합니다. 비어 있으면 해당 자식 컴포넌트를 슬롯에 드래그해 연결하고 저장 후 메뉴2를 실행합니다.
 Goals 각 행은 Description TMP / Background Image / Achieved Sprite(파란색) / Pending Sprite(분홍색) 참조가 있습니다.
 달성 행은 파란색 배경과 취소선, 미달성 행은 분홍색 배경과 일반 글꼴입니다. Undo/Retry/단계전환 시 다시 갱신됩니다.
 ResourceStripUI는 **Icons → ResourceIcons.asset**, **Font → NotoSansKR-Medium SDF**입니다. 실행 중 Icon/Amount 자식을 만들며 prefab에 수치를 고정하지 않습니다.
