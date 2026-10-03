@@ -219,7 +219,7 @@ public class BoardManager : MonoBehaviour
 
         var root = new GameObject("UndoBuildingCandidates");
         root.SetActive(false);
-        root.transform.SetParent(transform, false);
+        root.transform.SetParent(transform, true);
         var buildings = new List<BuildingInstance>();
         try
         {

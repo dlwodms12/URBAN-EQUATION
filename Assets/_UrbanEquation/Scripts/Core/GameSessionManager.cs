@@ -138,7 +138,7 @@ public class GameSessionManager : MonoBehaviour
             {
                 stagingRoot = new GameObject("BuildingCandidate");
                 stagingRoot.SetActive(false);
-                stagingRoot.transform.SetParent(tile.transform, false);
+                stagingRoot.transform.SetParent(tile.transform, true);
                 candidate = Instantiate(buildingPrefab, stagingRoot.transform);
                 candidate.transform.position = tile.transform.position;
                 candidate.transform.rotation = Quaternion.identity;
