@@ -1,7 +1,7 @@
 # URBAN EQUATION 개발 로드맵
 
 기준: 2026-10-03 최신 PDF(5), 33페이지와 사용자 확정 답변.
-작업 시작 전에 이 파일과 `Docs/PHASE4C_SCREENS.md`를 읽습니다.
+작업 시작 전에 이 파일과 `Docs/PHASE4D_FINAL_QA.md`를 읽습니다.
 상세 로드맵: `dlwodms12/LJE_GPT_Log`의 `memory/entries/MEM-20261001-0610-urban-equation-development-roadmap-v1.md`.
 
 ## 진행 순서
@@ -20,8 +20,8 @@
 - [x] Phase 3-J: 실제 BuildingData15종·Stage1/2 전체루프 (전체테스트·Prototype·디버그 기능 사용자 검증 완료)
 - [x] Phase 4-A: 공통 프리팹 (사용자 테스트·실제 동작 확인 및 프리팹/연결 데이터 Push 완료)
 - [x] Phase 4-B: Main Game HUD·카드/건물 상세·콤보 조회 (사용자 확인 및 생성 파일 Push 완료)
-- [ ] Phase 4-C: Lobby/Game 실제 씬·메뉴·팝업 (소스/61개 신규 테스트 작성, Unity 생성/검증 대기)
-- [ ] Phase 4-D: 최종 플레이 검증
+- [x] Phase 4-C: Lobby/Game 실제 씬·메뉴·팝업 (사용자 확인 및 생성물 원격 Push 확인)
+- [ ] Phase 4-D: 최종 플레이 검증 (통합21개/최종Audit·복수콤보QA미리보기 준비, Unity/Player 검증 대기)
 
 ## 확정 규칙
 
@@ -36,21 +36,20 @@
 
 ## 현재 위치와 검증 경계
 
-2026-10-03T10:50:15+09:00 사용자가 “확인하고 Push 했어”라고 보고했습니다.
-직전 안내는 전체318개와HUD검증이며 이번발화에개수를재명시하지않았습니다.4-B사용자확인완료로반영합니다.
-4-B원격커밋 `3bbaab7988e5255b9568679f62d6729fdae979fe`(프리팹 연결): HUD/ResourceIcons/GameplayHud와meta 신규6파일, 자원아이콘import meta15수정을 확인했습니다.
-4-A/4-B 사용자 생성물과 데이터·모델·기존테스트를 유지하며 현재4-C입니다.
-새브랜치 **codex/phase4c-screens**, 기준은위사용자커밋. 상세순서/경로/슬롯/빌드목록/플레이확인은 **Docs/PHASE4C_SCREENS.md**.
+2026-10-03T11:24:47+09:00 사용자가4-C확인완료를보고했습니다. 직전379개안내와화면확인완료로반영하며이번발화에는테스트수를재명시하지않았습니다.
+원격 `8fc357cb8f9eb12dea68d94c5a034479245aafc7`(프리팹 연결)의화면프리팹/설정/두씬/meta/닫기import Push10파일을확인했습니다.
+원격EditorBuildSettings가Prototype만포함해최신씬GUID로Lobby/Game을0/1에등록했습니다.기존Prototype항목/configObjects를보존합니다.
+현재4-D,새브랜치 **codex/phase4d-final-qa**,기준은위사용자커밋입니다.상세확인표/해답/미리보기/빌드순서는 **Docs/PHASE4D_FINAL_QA.md**.
 
-4-C는실제Lobby/Game씬,로비Play/Continue/Exit,시작·종료확인,StageSelect해금/최고랭크,첫진입안내,Pause/Clear/Retry/Next/저장·로딩오류복구를연결합니다.
-GameApplication이세션/저장/Flow/Router를유지하며씬카메라/EventSystem/뷰만교체합니다.로딩동안입력차단,Retry/Next는같은Game씬에서스테이지초기화,Exit확인시EditorPlay정지/Player종료입니다.
-기존디버그메뉴와Prototype는유지합니다. 새Game씬에서만HUD뒤배경표시옵션을켜며게임입력gate는그대로적용합니다.
-새메뉴 **Tools > Urban Equation > Phase 4C > 1 Create Missing Screens and Scenes → 2 Validate Screens and Scenes → 4 Preview with Temporary Save**.
-정식씬은 **3 Open Lobby Scene** 이후Play로실행합니다.
-사용자메뉴1이Pfb_Flow_Screens_001.prefab/GameApplication.asset/Lobby.unity/Game.unity와meta/Popup폴더meta를생성하고,XButtonPNGmeta와EditorBuildSettings.asset를수정합니다.
-빌드목록은Lobby/Game을앞에추가하고기존다른씬항목순서/enabled를보존합니다.기존HUD/프리팹/데이터/씬파일삭제·이동·덮어쓰기없음.
-신규9C#+각meta 및안내서19파일,위HUD/Flow/로드맵3수정으로총22소스/문서변경입니다.생성물은Unity실행후사용자Commit/Push필요합니다.
-다음확인: Unity종료→새브랜치Pull→컴파일오류없음→메뉴1/2 `Phase4-C Screens Validation OK`→EditMode전체 **379개**→메뉴4실제씬전환/화면→메뉴3정식저장재실행/Continue→기존Prototype→생성파일/meta·수정import/빌드목록 Commit/Push.
+신규최종점검메뉴 **Tools > Urban Equation > Phase 4D > 1 Audit Final Setup**은4-A~C참조·MissingScripts·15건물/30콤보·Stage1/2·빌드목록을읽어서확인합니다.
+**2 Open Lobby for Final QA**는정식Lobby파일을열며Play는사용자가실행합니다.
+**3 Multi Combo QA Preview**는원본데이터의메모리복제본(주택3장/일자리3),기존HUD,매실행GUID가다른임시save만사용합니다.
+좌표(0,1)→(1,0)→(1,1)에서마지막건설에왼쪽/아래2콤보,인구5/일자리0,Undo후인구2/일자리1/주택1장복원,재건설/조회/팝업순서를확인합니다. Stop시자기임시폴더정리. 원본Stage1카드2장·일자리2유지.
+
+FinalGameplayContractTests21개는실제사용자HUD/화면프리팹을함께바인딩해Stage1랭크1~3/Stage2최종자원·랭크/연속Undo전체상태·카드순서/비활성/최고랭크save/Pause·Continue·Retry/복수콤보큐·자동타이밍·조회·Undo를확인합니다.
+자동테스트는OS GUID임시save와메모리세션만사용하며실제씬load/종료/productionsave/import/asset생성은하지않습니다. 실제비동기씬전환/입력/해상도/Player빌드는수동QA로확인합니다.
+신규2C#+meta+안내서5파일,ProjectSettings빌드목록과로드맵2수정으로총7변경.기존런타임소스/379테스트/사용자생성물/데이터/메타/현재구조유지.삭제/이동없음.
+다음확인:새브랜치Pull→컴파일오류없음→Audit정상→EditMode **400개**→정식Lobby QA-01~18/복수콤보미리보기→기존Prototype→Windows Player빌드·재실행·종료확인.
 
 | 테스트 클래스 | 예상 수 |
 |---|---:|
@@ -67,7 +66,8 @@ GameApplication이세션/저장/Flow/Router를유지하며씬카메라/EventSyst
 | PrefabContractTests | 29 |
 | GameHudContractTests | 46 |
 | GameScreensContractTests | 61 |
-| 전체 | 379 |
+| FinalGameplayContractTests | 21 |
+| 전체 | 400 |
 
-AI환경에는Unity/C#컴파일러가없어실제생성/import·컴파일·EditMode·Play·렌더를실행하지못했습니다. 소스구문(컴파일아님)/사용자참조GUID/테스트선언수/기존파일보존/원격반영을확인합니다.
-실제4-C프리팹/설정/씬은사용자메뉴실행에서생성하며4-C검증완료로간주하지않습니다.확인및생성파일Push후4-D최종Stage1/2검증으로진행합니다.
+AI환경에는Unity/C#컴파일러가없어실제컴파일·EditMode·Play·렌더/빌드를실행하지못했습니다.구문(컴파일아님)/기존원본hash/씬GUID/빌드목록/테스트선언수400/원격반영을확인합니다. 
+현재4-C사용자확인완료와4-D소스/회귀/도구준비완료를구분합니다. 최종400개·Audit·수동/Player QA완료보고후Stage1/2Phase4완료로기록합니다. 
