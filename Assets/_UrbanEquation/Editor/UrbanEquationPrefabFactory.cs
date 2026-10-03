@@ -91,7 +91,7 @@ public static class UrbanEquationPrefabFactory
         var root = Rect("ComboPopup", null, new Vector2(210,230));
         var image = root.AddComponent<Image>(); image.sprite = background; image.type = Image.Type.Sliced;
         image.raycastTarget = false;
-        var group = root.AddComponent<CanvasGroup>(); group.interactable = false; group.blocksRaycasts = false;
+        var group = root.AddComponent<CanvasGroup>(); group.alpha = 0; group.interactable = false; group.blocksRaycasts = false;
         var logo = Rect("ComboHeader",root.transform,new Vector2(160,48));
         ((RectTransform)logo.transform).anchoredPosition = new Vector2(0,80);
         var logoImage = logo.AddComponent<Image>(); logoImage.sprite = header;

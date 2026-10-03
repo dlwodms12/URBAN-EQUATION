@@ -42,7 +42,13 @@ public class ComboPopupUI : MonoBehaviour
         if (isActiveAndEnabled) Subscribe();
     }
 
-    private void OnEnable() => Subscribe();
+    private void OnEnable()
+    {
+        if (CurrentResult == null)
+            Hide();
+
+        Subscribe();
+    }
     private void OnDisable() { Unsubscribe(); Hide(); }
     private void OnDestroy() => Unsubscribe();
     private void Update() => Tick(Time.unscaledDeltaTime);
