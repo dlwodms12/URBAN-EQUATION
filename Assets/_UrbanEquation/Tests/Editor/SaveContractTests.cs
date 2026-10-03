@@ -438,13 +438,156 @@ public class SaveContractTests
     }
 
     [Test]
-    public void UnsupportedVersionOrDifferentStageCountCannotLoad()
+    public void UnsupportedVersionOrSmallerStageCatalogCannotLoad()
     {
-        foreach (string json in new[] { Json(version: 0), Json(version: 2), Json(count: 2, ranks: "[0,0]") })
+        foreach (string json in new[] { Json(version: 0), Json(version: 2), Json(count: 4, ranks: "[0,0,0,0]") })
         {
             Assert.That(Decode(json, 3, out object data), Is.False);
             Assert.That(data, Is.Null);
         }
+    }
+
+    [TestCase(5)]
+    [TestCase(10)]
+    public void ExpandedCatalogPreservesIncompleteFrontierAndPadsNewRanks(int count)
+    {
+        Assert.That(Decode(Json(count: 2, unlocked: 2, ranks: "[3,0]"), count, out object data), Is.True);
+        Assert.That(Get(data, "StageCount"), Is.EqualTo(count));
+        Assert.That(Get(data, "HighestUnlockedStage"), Is.EqualTo(2));
+        var expected = new int[count]; expected[0] = 3;
+        Assert.That((IList)Get(data, "BestRanks"), Is.EqualTo(expected));
+        Assert.That(Call(data, "IsStageUnlocked", 3), Is.False);
+    }
+
+    [TestCase(5)]
+    [TestCase(10)]
+    public void ClearedOldFinalStageUnlocksOnlyTheFirstAppendedStage(int count)
+    {
+        Assert.That(Decode(Json(count: 2, unlocked: 2, ranks: "[3,2]"), count, out object data), Is.True);
+        Assert.That(Get(data, "HighestUnlockedStage"), Is.EqualTo(3));
+        var expected = new int[count]; expected[0] = 3; expected[1] = 2;
+        Assert.That((IList)Get(data, "BestRanks"), Is.EqualTo(expected));
+        Assert.That(Call(data, "IsStageUnlocked", 3), Is.True);
+        Assert.That(Call(data, "IsStageUnlocked", 4), Is.False);
+    }
+
+    [TestCase(1, "[0]", 1)]
+    [TestCase(1, "[3]", 2)]
+    public void SingleStageSavesExpandAccordingToWhetherTheirFinalStageWasCleared(int oldCount, string ranks, int unlocked)
+    {
+        Assert.That(Decode(Json(count: oldCount, unlocked: 1, ranks: ranks), 10, out object data), Is.True);
+        Assert.That(Get(data, "HighestUnlockedStage"), Is.EqualTo(unlocked));
+    }
+
+    [Test]
+    public void FiveCompletedStagesExpandToTenWithoutUnlockingTheEntireCatalog()
+    {
+        Assert.That(Decode(Json(count: 5, unlocked: 5, ranks: "[1,2,3,2,1]"), 10, out object data), Is.True);
+        Assert.That(Get(data, "HighestUnlockedStage"), Is.EqualTo(6));
+        Assert.That((IList)Get(data, "BestRanks"), Is.EqualTo(new[] { 1,2,3,2,1,0,0,0,0,0 }));
+        Assert.That(Call(data, "IsStageUnlocked", 7), Is.False);
+    }
+
+    [Test]
+    public void ExpansionDoesNotMutateTheOriginalProgressOrItsRanks()
+    {
+        object original = Record(Record(Fresh(2), 1, 3), 2, 2);
+        object[] args = { 10, null, null };
+        Assert.That(Call(original, "TryExpandStages", args), Is.True, args[2] as string);
+        Assert.That(Get(original, "StageCount"), Is.EqualTo(2));
+        Assert.That((IList)Get(original, "BestRanks"), Is.EqualTo(new[] { 3,2 }));
+        Assert.That(Get(args[1], "HighestUnlockedStage"), Is.EqualTo(3));
+        Assert.Throws<NotSupportedException>(() => ((IList)Get(args[1], "BestRanks"))[0] = 0);
+    }
+
+    [Test]
+    public void MatchingCatalogDoesNotChangeCompletedFinalStageProgress()
+    {
+        object original = Record(Record(Fresh(2), 1, 3), 2, 2);
+        object[] args = { 2, null, null };
+        Assert.That(Call(original, "TryExpandStages", args), Is.True);
+        Assert.That(args[1], Is.SameAs(original));
+        Assert.That(Decode(Encode(original), 2, out object decoded), Is.True);
+        Assert.That(Get(decoded, "HighestUnlockedStage"), Is.EqualTo(2));
+    }
+
+    [TestCase(0)]
+    [TestCase(1)]
+    public void ExpansionRejectsSmallerOrInvalidCatalogWithoutMutatingProgress(int count)
+    {
+        object original = Fresh(2);
+        object[] args = { count, null, null };
+        Assert.That(Call(original, "TryExpandStages", args), Is.False);
+        Assert.That(args[1], Is.Null); Assert.That(args[2], Is.Not.Null);
+        Assert.That(Get(original, "StageCount"), Is.EqualTo(2));
+    }
+
+    [TestCase(2, 2, "[0,3]")]
+    [TestCase(2, 1, "[3,0]")]
+    [TestCase(2, 2, "[3,4]")]
+    [TestCase(2, 2, "[3]")]
+    [TestCase(2, 3, "[3,2]")]
+    [TestCase(0, 1, "[]")]
+    public void ExpansionRejectsMalformedOriginalProgressBeforeAddingNewStages(int count, int unlocked, string ranks)
+    {
+        Assert.That(Decode(Json(count: count, unlocked: unlocked, ranks: ranks), 10, out object data), Is.False);
+        Assert.That(data, Is.Null);
+    }
+
+    [Test]
+    public void MigratedProgressRoundTripIsIdempotentAndKeepsTheExistingJsonSchema()
+    {
+        Assert.That(Decode(Json(count: 2, unlocked: 2, ranks: "[3,2]"), 10, out object first), Is.True);
+        string encoded = Encode(first);
+        Assert.That(Decode(encoded, 10, out object second), Is.True);
+        Assert.That(Get(second, "HighestUnlockedStage"), Is.EqualTo(3));
+        Assert.That(Encode(second), Is.EqualTo(encoded));
+        Assert.That(encoded.Split(':').Length - 1, Is.EqualTo(4));
+    }
+
+    [Test]
+    public void ExpandedSaveManagerLoadsReadOnlyThenPersistsNewStageProgress()
+    {
+        string path = SavePath();
+        string original = Json(count: 2, unlocked: 2, ranks: "[3,2]");
+        File.WriteAllText(path, original);
+        Component manager = SaveManager(path, 10);
+        Assert.That(Get(manager, "CanContinue"), Is.True);
+        Assert.That(File.ReadAllText(path), Is.EqualTo(original));
+        Assert.That(Save(manager, 3, 1), Is.True);
+        Assert.That(Decode(File.ReadAllText(path), 10, out object stored), Is.True);
+        Assert.That(Get(stored, "StageCount"), Is.EqualTo(10));
+        Assert.That(Get(stored, "HighestUnlockedStage"), Is.EqualTo(4));
+        Component reloaded = SaveManager(path, 10);
+        Assert.That(Best(reloaded, 1), Is.EqualTo(3)); Assert.That(Best(reloaded, 2), Is.EqualTo(2));
+        Assert.That(Best(reloaded, 3), Is.EqualTo(1));
+        Assert.That(Directory.GetFiles(Path.GetDirectoryName(path), "*.tmp"), Is.Empty);
+    }
+
+    [Test]
+    public void CorruptOlderSaveCannotBeSilentlyExpandedOrRewritten()
+    {
+        string path = SavePath(); string invalid = Json(count: 2, unlocked: 2, ranks: "[0,3]");
+        File.WriteAllText(path, invalid);
+        Component manager = SaveManager(path, 10, false);
+        Assert.That(Command(manager, "TryLoad"), Is.False);
+        Assert.That(Get(manager, "CanContinue"), Is.False);
+        Assert.That(File.ReadAllText(path), Is.EqualTo(invalid));
+    }
+
+    [Test]
+    public void FailedExpandedProgressWriteRetainsOriginalSaveAndCanRetry()
+    {
+        string path = SavePath(); string original = Json(count: 2, unlocked: 2, ranks: "[3,2]");
+        File.WriteAllText(path, original); Component manager = SaveManager(path, 10);
+        File.Move(path, path + ".old"); Directory.CreateDirectory(path);
+        object before = Get(manager, "Progress");
+        Assert.That(Save(manager, 3, 1), Is.False);
+        Assert.That(Get(manager, "Progress"), Is.SameAs(before));
+        Assert.That(File.ReadAllText(path + ".old"), Is.EqualTo(original));
+        Directory.Delete(path); File.Move(path + ".old", path);
+        Assert.That(Save(manager, 3, 1), Is.True);
+        Assert.That(Get(Get(SaveManager(path, 10), "Progress"), "HighestUnlockedStage"), Is.EqualTo(4));
     }
 
     [Test]

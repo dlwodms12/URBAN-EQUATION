@@ -107,7 +107,7 @@ public class FinalGameplayContractTests
     {
         var game=Playing(2);var hud=Hud(game);var screens=Screens(game);StageTwoBuilds(game);
         Assert.That(Resources(game),Is.EqualTo(new[]{0,1,0,1,0}));Assert.That(Get(Stage(game),"Rank"),Is.EqualTo(3));Assert.That(Cards(hud),Is.Empty);
-        ((Button)Field(hud,"nextButton")).onClick.Invoke();Assert.That(((Button)Field(screens,"nextButton")).interactable,Is.False);
+        ((Button)Field(hud,"nextButton")).onClick.Invoke();Assert.That(((Button)Field(screens,"nextButton")).interactable,Is.EqualTo((int)Get(Flow(game),"StageCount")>2));
         Assert.That(Items(Field(screens,"clearStars")).Cast<Image>().All(x=>x.enabled),Is.True);
     }
     [Test] public void StageTwoUndoEachCompletedTurnRestoresWholeStateAndHudOrder()
@@ -198,6 +198,13 @@ public class FinalGameplayContractTests
     }
     [Test] public void FirstBuildRemainsUndoBoundaryWithRealHud()
     { var game=Playing();var hud=Hud(game);Build(game,1,0,0);string before=Fingerprint(game);Assert.That(((Button)Field(hud,"undoButton")).interactable,Is.False);Assert.That(TryCommand(History(game),"TryUndo"),Is.False);Assert.That(Fingerprint(game),Is.EqualTo(before)); }
-    [Test] public void SelectingFinalStageClearReturnsRanksAndUnlocksInRealUi()
-    { var game=Playing(2);var screens=Screens(game);StageTwoBuilds(game);Command(Flow(game),"TryCompleteStage");((Button)Field(screens,"clearSelectButton")).onClick.Invoke();Assert.That(Get(Flow(game),"State").ToString(),Is.EqualTo("StageSelect"));var rows=Items(Field(screens,"rows"));Assert.That(rows.Select(x=>Get(x,"BestRank")),Is.EqualTo(new[]{3,3}));Assert.That(rows.All(x=>(bool)Get(x,"IsUnlocked")),Is.True); }
+    [Test] public void SelectingStageTwoClearReturnsRanksAndUnlocksInRealUi()
+    {
+        var game=Playing(2);var screens=Screens(game);StageTwoBuilds(game);Command(Flow(game),"TryCompleteStage");
+        ((Button)Field(screens,"clearSelectButton")).onClick.Invoke();Assert.That(Get(Flow(game),"State").ToString(),Is.EqualTo("StageSelect"));
+        var rows=Items(Field(screens,"rows"));int count=(int)Get(Flow(game),"StageCount");
+        Assert.That(rows.Length,Is.EqualTo(count));
+        Assert.That(rows.Select(x=>Get(x,"BestRank")),Is.EqualTo(Enumerable.Range(1,count).Select(number=>number<=2?3:0)));
+        Assert.That(rows.Select(x=>(bool)Get(x,"IsUnlocked")),Is.EqualTo(Enumerable.Range(1,count).Select(number=>number<=3)));
+    }
 }

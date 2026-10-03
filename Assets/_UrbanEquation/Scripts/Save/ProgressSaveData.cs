@@ -48,6 +48,24 @@ public sealed class ProgressSaveData
         return ranks;
     }
 
+    // Catalogs may append stages; existing numbers keep the same meaning.
+    // Validate the stored progress before calling this migration (see the codec).
+    public bool TryExpandStages(int stageCount, out ProgressSaveData data, out string error)
+    {
+        data = null;
+        error = null;
+        if (stageCount < StageCount)
+        { error = "Saved progress contains more stages than this game configuration."; return false; }
+        if (stageCount == StageCount) { data = this; return true; }
+
+        var ranks = new int[stageCount];
+        for (int i = 0; i < StageCount; i++) ranks[i] = BestRanks[i];
+        int unlocked = HighestUnlockedStage;
+        // The old final stage had no successor when its clear was recorded.
+        if (unlocked == StageCount && ranks[StageCount - 1] > 0) unlocked++;
+        return TryRestore(stageCount, unlocked, ranks, out data, out error);
+    }
+
     internal static bool TryRestore(int count, int unlocked, int[] ranks,
         out ProgressSaveData data, out string error)
     {

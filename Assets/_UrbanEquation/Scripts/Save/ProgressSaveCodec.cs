@@ -44,9 +44,10 @@ public static class ProgressSaveCodec
         { error = "Could not decode save: " + exception.Message; return false; }
         if (document == null || document.version != ProgressSaveData.CurrentVersion)
         { error = "Save version is missing or unsupported."; return false; }
-        if (document.stageCount != expectedStageCount)
-        { error = "Save stage count does not match this game configuration."; return false; }
-        return ProgressSaveData.TryRestore(document.stageCount, document.highestUnlockedStage,
-            document.bestRanks, out data, out error);
+        // Check the original document first; expansion must not repair corrupt ranks/unlocks.
+        if (!ProgressSaveData.TryRestore(document.stageCount, document.highestUnlockedStage,
+            document.bestRanks, out ProgressSaveData saved, out error)) return false;
+        // Loading remains read-only. A later progress write uses the expanded stage count.
+        return saved.TryExpandStages(expectedStageCount, out data, out error);
     }
 }

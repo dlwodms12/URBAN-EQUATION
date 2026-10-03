@@ -38,14 +38,7 @@ public static class UrbanEquationFinalQa
         {
             if(content.Buildings==null || content.Buildings.Buildings.Count!=15) errors.Add("Final content requires the existing fifteen building definitions.");
             if(content.Combos==null || content.Combos.Combos.Count!=30) errors.Add("Final content requires the existing thirty combo definitions.");
-            if(content.Stages==null || content.Stages.Count!=2) errors.Add("Final QA targets the two currently authored stages.");
-            else
-            {
-                if(!content.Stages.TryGetStage(1,out StageData first) || first.Width!=2 || first.Height!=2
-                    || first.BuildingCards.Sum(x=>x==null?0:x.Count)!=2) errors.Add("Stage1 must retain its 2x2 board and two building cards.");
-                if(!content.Stages.TryGetStage(2,out StageData second) || second.Width!=3 || second.Height!=3
-                    || second.BuildingCards.Sum(x=>x==null?0:x.Count)!=5) errors.Add("Stage2 must retain its 3x3 board and five building cards.");
-            }
+            ValidateStageCatalog(content.Stages,errors);
         }
         var paths=new[]{UrbanEquationHudSetup.HudPath,UrbanEquationScreensSetup.ScreensPath,
             "Assets/_UrbanEquation/Prefabs/UI/Cards/BuildingCard.prefab",
@@ -64,6 +57,18 @@ public static class UrbanEquationFinalQa
         foreach(string path in new[]{UrbanEquationScreensSetup.LobbyPath,UrbanEquationScreensSetup.GamePath})
             if(string.IsNullOrEmpty(AssetDatabase.AssetPathToGUID(path))) errors.Add("Scene GUID is missing: "+path);
         return errors;
+    }
+
+    public static void ValidateStageCatalog(StageCatalog catalog,List<string> errors)
+    {
+        if(catalog==null || catalog.Count<2)
+        { errors.Add("Final content requires the existing Stage1 and Stage2 definitions."); return; }
+        // Validate every registered stage while preserving the shipped tutorial contracts.
+        catalog.Validate(errors);
+        if(!catalog.TryGetStage(1,out StageData first) || first.Width!=2 || first.Height!=2
+            || first.BuildingCards.Sum(x=>x==null?0:x.Count)!=2) errors.Add("Stage1 must retain its 2x2 board and two building cards.");
+        if(!catalog.TryGetStage(2,out StageData second) || second.Width!=3 || second.Height!=3
+            || second.BuildingCards.Sum(x=>x==null?0:x.Count)!=5) errors.Add("Stage2 must retain its 3x3 board and five building cards.");
     }
     [MenuItem("Tools/Urban Equation/Phase 4D/2 Open Lobby for Final QA")]
     private static void OpenLobby()
