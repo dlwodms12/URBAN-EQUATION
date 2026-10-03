@@ -11,8 +11,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed3ef9a563b25c1a92fe3ae5454b71ee, type: 3}
   m_Name: GameContent
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   buildingCatalog: {fileID: 11400000, guid: f91f005cb98553c8859a75ddee5e813f, type: 2}
   comboDatabase: {fileID: 11400000, guid: d5e513995d024dba878802a95ec4ffdd, type: 2}
   stageCatalog: {fileID: 11400000, guid: 8cbc1ae7124751a78bd8d5d53f3aa266, type: 2}
-  buildingPrefab: {fileID: 1387219748002981859, guid: 6172ce0af98ce244aa1284d7da74b378, type: 3}
+  buildingPrefab: {fileID: 5803037715801990424, guid: d75248a0dd1d3e74baf8f5ce05709e2e, type: 3}

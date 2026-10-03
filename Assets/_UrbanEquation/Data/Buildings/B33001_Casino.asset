@@ -11,11 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cebc08413787d4d4b863df02371a2e8a, type: 3}
   m_Name: B33001_Casino
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   buildingCode: 33001
-  buildingName: "카지노"
-  visualPrefab: {fileID: 0}
-  cardImage: {fileID: 0}
+  buildingName: "\uCE74\uC9C0\uB178"
+  visualPrefab: {fileID: 5800875532185041811, guid: 07c8e106acd5e374993ac59b372212a8, type: 3}
+  cardImage: {fileID: 21300000, guid: c2b6b2c62c90b3b4b88f6d6d4002fadf, type: 3}
   useResourceLists: 1
   requiredResources:
   - resource: 3

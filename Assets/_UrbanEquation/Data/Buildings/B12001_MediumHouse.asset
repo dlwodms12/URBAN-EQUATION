@@ -11,11 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cebc08413787d4d4b863df02371a2e8a, type: 3}
   m_Name: B12001_MediumHouse
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   buildingCode: 12001
-  buildingName: "중형 주택"
-  visualPrefab: {fileID: 0}
-  cardImage: {fileID: 0}
+  buildingName: "\uC911\uD615 \uC8FC\uD0DD"
+  visualPrefab: {fileID: 1699031562973691520, guid: 82809e6ef2813764e93f68cc99f7a75a, type: 3}
+  cardImage: {fileID: 21300000, guid: f448bd196a74ef6468829327dfdaa6b3, type: 3}
   useResourceLists: 1
   requiredResources:
   - resource: 1

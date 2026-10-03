@@ -11,11 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cebc08413787d4d4b863df02371a2e8a, type: 3}
   m_Name: B52001_Temple
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   buildingCode: 52001
-  buildingName: "절"
-  visualPrefab: {fileID: 0}
-  cardImage: {fileID: 0}
+  buildingName: "\uC808"
+  visualPrefab: {fileID: 2775898028984632495, guid: ae15a32fda7ceda4cb1e852941089c07, type: 3}
+  cardImage: {fileID: 21300000, guid: 03844f6737041e74f909e63695add90f, type: 3}
   useResourceLists: 1
   requiredResources:
   - resource: 0
