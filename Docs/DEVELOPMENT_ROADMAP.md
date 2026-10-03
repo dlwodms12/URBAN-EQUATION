@@ -1,7 +1,7 @@
 # URBAN EQUATION 개발 로드맵
 
 기준: 2026-10-03 최신 PDF(5), 33페이지와 사용자 확정 답변.
-작업 시작 전에 이 파일과 `Docs/PHASE4A_PREFABS.md`를 읽습니다.
+작업 시작 전에 이 파일과 `Docs/PHASE4B_HUD.md`를 읽습니다.
 상세 로드맵: `dlwodms12/LJE_GPT_Log`의 `memory/entries/MEM-20261001-0610-urban-equation-development-roadmap-v1.md`.
 
 ## 진행 순서
@@ -18,8 +18,8 @@
 - [x] Phase 3-H: 진행도·해금·최고 랭크 저장 (사용자 검증)
 - [x] Phase 3-I: Lobby/Game 화면 상태·New Game/Continue·Retry·Exit (195개·Prototype 사용자 검증)
 - [x] Phase 3-J: 실제 BuildingData15종·Stage1/2 전체루프 (전체테스트·Prototype·디버그 기능 사용자 검증 완료)
-- [ ] Phase 4-A: 공통 프리팹 (생성/연결 도구·표시 코드·29개 신규 테스트 작성, Unity 생성/검증 대기)
-- [ ] Phase 4-B: 최종 Main Game HUD·카드 상세·연출
+- [x] Phase 4-A: 공통 프리팹 (사용자 테스트·실제 동작 확인 및 프리팹/연결 데이터 Push 완료)
+- [ ] Phase 4-B: Main Game HUD·카드/건물 상세·콤보 조회 (코드/46개 신규 테스트 작성, Unity 생성/검증 대기)
 - [ ] Phase 4-C: Lobby/Game 실제 씬·메뉴·팝업
 - [ ] Phase 4-D: 최종 플레이 검증
 
@@ -36,25 +36,19 @@
 
 ## 현재 위치와 검증 경계
 
-2026-10-03T07:47:39+09:00: 사용자가 3-J 전체 테스트·기존 Prototype·디버그 게임 기능 동작을 확인하고 다음 작업과 상세 Unity 작업 안내를 요청했습니다.
-이번 메시지에 개수는 직접 재명시하지 않았으며 앞서 안내한 예상 전체243개에 대한 검증 확인으로 반영합니다.
-대형 사무실 B23001은 사용자 선택에 따라 당시 PDF(4) 표의 파일명 Building_House_Block을 연결했습니다. 최신 PDF(5)의 명시적 수정으로 현재는 Building_Skyscraper를 연결합니다.
-2026-10-03T09:14:29+09:00 중단 재개 점검: 이전4-A 코드/문서는 PR #11에 게시 완료이며, 생성 프리팹/Unity 검증 확인은 아직 없습니다. 새 PDF 전체33페이지를 이전본과 동일 해상도로 비교해13페이지 차이만 확인했습니다. B23001 모델을 Building_Skyscraper로 수정하고, 검증 메뉴가 잘못된 실제 모델 참조도 거부하도록 보완했습니다. 참조누락/구모델거부/신모델허용 회귀3개를 추가했습니다. 사용자 PC의 미커밋 생성물은 확인하지 못했으며4-A 사용자검증 대기를 유지합니다.
-현재 브랜치: **codex/phase4a-common-prefabs**, 기준J 커밋 `2a5f8d8be0cb7f0eafcd9ff7e32938a932fb650a`.
-Unity 작업과 파일별 Inspector 안내: **Docs/PHASE4A_PREFABS.md**.
+2026-10-03T09:41:35+09:00 사용자가 테스트와 실제 동작 확인 및 변경 파일 Push를 보고했습니다.
+이번 발화에 개수를 직접 반복하지 않았으며 앞서 안내한272개 검증 완료 확인으로 반영합니다.
+4-A 사용자 커밋 `02d97210cb1d0fce77181283b0fb56b87f7d73e1`(Prefab 연결): 새6prefab과GameplayPrefabs/meta16파일, 수정19data/16image importer meta를 확인했습니다.
+대형사무실은 최신PDF(5)의Building_Skyscraper를 유지합니다. 4-A 사용자 검증 완료이며 현재4-B입니다.
+새브랜치: **codex/phase4b-game-hud**, 기준4-A 사용자 커밋위동일. 상세 **Docs/PHASE4B_HUD.md**.
 
-Phase4-A 생성 메뉴는 새 타일3종·BuildingRoot·BuildingCard·ComboPopup 및 GameplayPrefabs.asset을 만들고 본개발 데이터 참조를 연결합니다.
-생성된 목적지 프리팹은 재생성하지 않으며 현재 편집 내용을 유지합니다. 참조와16개 이미지 import 설정은 재연결합니다.
-원래 Tile/Building 프리팹은 유지하며 새로운 BuildingRoot의 Visual Offset으로 Surface 위에 외형을 올립니다. 기존 기본값0으로 Prototype 동작을 유지합니다.
-카드 이미지15개와 콤보 이미지1개를 Sprite Single로 import하고 외부 pack 및 PNG/GUID는 유지합니다.
-ComboPopupUI는 이미 지급된 결과의 표시·위치·부호/색·페이드·순차 완료만 처리합니다. GameplayPrefabPreview는 카드 드래그/오버레이/콤보를 임시 씬에 연결합니다.
-Source와 도구는 작성했으며 **프리팹 asset 자체는 사용자 Unity에서 메뉴 실행 시 생성**됩니다. 아직 4-A 생성/import/Play 검증 완료로 기록하지 않습니다.
-기존 Prototype 씬/프리팹/테스트243개, Fonts/Materials/Sprite 및 Assets/ScriptableObjects는 유지합니다. 삭제/이동 없음.
-본 단계는 공통 프리팹이며 최종 HUD·호버는4-B, 실제Lobby/Game씬·메뉴·팝업은4-C, 최종 검증은4-D입니다.
-
-이전 메뉴를 실행했어도 메뉴1→2를 재실행하면 최신 모델 참조를 적용하고 기존 프리팹 편집을 유지합니다. 생성파일 Push와 사용자 검증 이후4-B를 진행합니다.
-
-다음 확인: Unity 종료 → 브랜치 최신 Pull → 재실행/컴파일 오류 없음 → Tools > Urban Equation > Phase 4A 메뉴1 생성 → 메뉴2 검증 → EditMode Run All **272개** → 메뉴3 미리보기/기존Prototype → 생성파일과meta·수정데이터 Commit/Push.
+4-B는 Overlay HUD/도시자원5종/목표3개 색·취소선/카드·Undo·NEXT·Pause/호버 상세/배치 피드백/자동 콤보1.5초·마지막0.5페이드/두인접건물 클릭 읽기전용 콤보조회를 연결합니다.
+새메뉴 Tools > Urban Equation > Phase 4B > 1 Create Missing HUD and Bind Icons → 2 Validate HUD Setup → 3 HUD Gameplay Preview.
+기존4-A 공통prefab/데이터를 유지하고 Pfb_Main_GameHud_001.prefab, ResourceIcons.asset, GameplayHud.asset을 사용자 Unity에서 생성합니다. Icon15PNG를 Sprite Single로import하며 PNG/GUID/외부GUI팩 설정은 유지합니다.
+Playing에서는 이전디버그패널을 숨기고 실제HUD로 조작합니다. Lobby/StageSelect/안내/Clear/Pause는4-C전까지기존디버그화면을사용합니다. 새정식씬/BuildSettings/LoadScene/Quit는이번단계에서변경하지않습니다.
+BuildingHandUI에는옵션호버연결,ComboPopupUI에는옵션자원아이콘/시간/별도영구조회,GameFlowDebugUI에는옵션Playing패널숨김,EditorDebugMenu에는4-B메뉴를추가했습니다. 기본Prototype/4-A미리보기 동작을 유지합니다.
+신규12C#+meta 및안내서(25신규), 위4C#+로드맵(5수정), 총30변경입니다. 삭제/이동없음.
+다음 확인: Unity종료→새브랜치Pull→컴파일오류없음→메뉴1생성/메뉴2 `Phase4-B HUD Validation OK`→EditMode Run All **318개**→메뉴3 실제HUD와기존Prototype→생성asset/meta·수정Iconmeta Commit/Push.
 
 | 테스트 클래스 | 예상 수 |
 |---|---:|
@@ -69,8 +63,8 @@ Source와 도구는 작성했으며 **프리팹 asset 자체는 사용자 Unity�
 | GameFlowContractTests | 40 |
 | StageIntegrationContractTests | 48 |
 | PrefabContractTests | 29 |
-| 전체 | 272 |
+| GameHudContractTests | 46 |
+| 전체 | 318 |
 
-새 테스트는 메모리에서 카드/타일/팝업을 생성하고 GUID OS임시 저장 경로를 정리합니다. 프로젝트 이미지 import/프리팹 파일 생성 메뉴를 자동 실행하지 않습니다.
-이 환경에는 Unity/C# 컴파일러가 없어 실제 컴파일·생성/import·EditMode·Play·화면 렌더링은 사용자 검증 대기입니다.
-정적 참조/구문/테스트 선언 집계 및 원격 반영을 확인합니다. 4-A 사용자 검증 후4-B로 진행합니다.
+AI환경에는Unity/C#컴파일러가없어실제생성/import·컴파일·EditMode·Play·렌더를실행하지못했습니다. 소스구문(컴파일아님)/사용자참조GUID/테스트선언수/기존asset·테스트보존/원격반영을확인합니다.
+실제새HUD파일은사용자메뉴실행에서생성하며4-B검증완료로간주하지않습니다. 확인및생성파일Push후4-C최종메뉴/팝업·실제Lobby/Game씬을진행합니다.

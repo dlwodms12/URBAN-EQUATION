@@ -10,6 +10,7 @@ public class ComboPopupUI : MonoBehaviour
     [SerializeField] private TMP_Text descriptionText;
     [SerializeField] private TMP_Text rewardsText;
     [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private ResourceStripUI rewardsView;
     [SerializeField, Min(0.1f)] private float displayDuration = 2f;
     [SerializeField, Min(0f)] private float fadeDuration = 0.25f;
     [SerializeField] private Vector2 screenOffset = new Vector2(0, 80);
@@ -17,7 +18,23 @@ public class ComboPopupUI : MonoBehaviour
     private ComboManager subscribed;
     private Camera boardCamera;
     private float elapsed;
+    private bool persistent;
     public ComboResult CurrentResult { get; private set; }
+    public bool IsPersistent => persistent && CurrentResult != null;
+
+    public bool TryConfigureTiming(float duration, float fade)
+    {
+        if (float.IsNaN(duration) || float.IsInfinity(duration) || duration <= 0
+            || float.IsNaN(fade) || float.IsInfinity(fade) || fade < 0 || fade > duration) return false;
+        displayDuration = duration; fadeDuration = fade; return true;
+    }
+    public void ShowPersistent(ComboResult result, Camera camera)
+    {
+        Unsubscribe(); Hide(); manager = null; boardCamera = camera;
+        if (result == null) return;
+        persistent = true; Show(result);
+    }
+    public void DismissPersistent() { if (persistent) Hide(); }
 
     public void Bind(ComboManager combos, Camera camera)
     {
@@ -52,22 +69,25 @@ public class ComboPopupUI : MonoBehaviour
         if (comboNameText != null) comboNameText.text = result.ComboName;
         if (descriptionText != null) descriptionText.text = result.Description;
         if (rewardsText != null) rewardsText.text = FormatRewards(result.Rewards);
+        if (rewardsView != null) rewardsView.Show(result.Rewards, true);
         if (canvasGroup != null)
         { canvasGroup.alpha = 1; canvasGroup.interactable = false; canvasGroup.blocksRaycasts = false; }
         Position();
     }
     private void Hide()
     {
-        CurrentResult = null; elapsed = 0;
+        CurrentResult = null; elapsed = 0; persistent = false;
         if (canvasGroup != null) canvasGroup.alpha = 0;
         if (comboNameText != null) comboNameText.text = string.Empty;
         if (descriptionText != null) descriptionText.text = string.Empty;
         if (rewardsText != null) rewardsText.text = string.Empty;
+        if (rewardsView != null) rewardsView.Clear();
     }
 
     public void Tick(float delta)
     {
         if (!isActiveAndEnabled || float.IsNaN(delta) || float.IsInfinity(delta) || delta < 0) return;
+        if (persistent) { if (canvasGroup != null) canvasGroup.alpha = 1; Position(); return; }
         ComboResult current = manager == null ? null : manager.CurrentPresentation;
         if (current != CurrentResult) { if (current == null) Hide(); else Show(current); }
         if (CurrentResult == null) return;
@@ -81,7 +101,7 @@ public class ComboPopupUI : MonoBehaviour
 
     public bool TryCompleteCurrent()
     {
-        if (!isActiveAndEnabled || manager == null || CurrentResult == null) return false;
+        if (!isActiveAndEnabled || persistent || manager == null || CurrentResult == null) return false;
         ComboResult expected = CurrentResult;
         Hide();
         bool completed = manager.TryCompletePresentation(expected);

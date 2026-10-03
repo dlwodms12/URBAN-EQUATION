@@ -16,16 +16,23 @@ public static class UrbanEquationDebugMenu
     private static void OpenPrefabPreview()
     { OpenDebug(true); }
 
+    [MenuItem("Tools/Urban Equation/Phase 4B/3 HUD Gameplay Preview")]
+    private static void OpenHudPreview() => OpenDebug(true,true);
+
+    [MenuItem("Tools/Urban Equation/Phase 4B/3 HUD Gameplay Preview", true)]
+    private static bool CanHudPreview() => !EditorApplication.isPlayingOrWillChangePlaymode;
+
     [MenuItem("Tools/Urban Equation/Phase 4A/3 Prefab Gameplay Preview", true)]
     private static bool CanPreview() => !EditorApplication.isPlayingOrWillChangePlaymode;
 
-    private static void OpenDebug(bool prefabPreview)
+    private static void OpenDebug(bool prefabPreview,bool hudPreview=false)
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) return;
         var content = AssetDatabase.LoadAssetAtPath<GameContentData>("Assets/_UrbanEquation/Data/GameContent.asset");
         var errors = new List<string>();
         if (content == null) errors.Add("GameContent.asset is missing."); else content.Validate(errors);
         if (prefabPreview) errors.AddRange(UrbanEquationPrefabSetup.CollectValidationErrors());
+        if (hudPreview) errors.AddRange(UrbanEquationHudSetup.CollectValidationErrors());
         if (errors.Count != 0) { Debug.LogError(string.Join("; ", errors)); return; }
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
         EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -48,7 +55,9 @@ public static class UrbanEquationDebugMenu
         {
             var events = new GameObject("Preview EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
             events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
-            root.AddComponent<GameplayPrefabPreview>().Configure(bootstrap,
+            if(hudPreview) root.AddComponent<GameplayHudPreview>().Configure(bootstrap,
+                AssetDatabase.LoadAssetAtPath<GameplayHudSet>(UrbanEquationHudSetup.SetPath),camera);
+            else root.AddComponent<GameplayPrefabPreview>().Configure(bootstrap,
                 AssetDatabase.LoadAssetAtPath<GameplayPrefabSet>(UrbanEquationPrefabSetup.PrefabSetPath),camera);
         }
         EditorApplication.isPlaying = true;
