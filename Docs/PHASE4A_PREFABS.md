@@ -2,7 +2,13 @@
 
 3-J의 전체 테스트·기존 Prototype·디버그 기능은 2026-10-03 사용자 확인으로 검증 완료했습니다.
 이번 단계는 공통 프리팹입니다. 최종 HUD·카드 상세 호버는 4-B, Lobby/Game 실제 씬·팝업은 4-C에서 진행합니다.
-대형 사무실 B23001은 사용자 선택에 따라 표의 파일명 `Building_House_Block`을 연결합니다.
+최신 기준은 2026-10-03 공유된 PDF(5), 33페이지입니다. 이전 PDF(4)와 동일 해상도로 전체 페이지를 비교하여 13페이지 변경만 확인했습니다.
+대형 사무실 B23001의 모델 파일명이 `Building_Skyscraper`로 수정되어, 이전 `Building_House_Block` 연결을 최신 표에 맞춰 대체합니다. 카드 이미지는 BOffice이며 비용·획득·타일 조건은 동일합니다.
+
+## 중단 시점 확인
+
+2026-10-03 09:14 재개 요청 시 원격 4-A 브랜치에는 생성 도구와 테스트만 있고, 아래 생성 프리팹6개와 GameplayPrefabs.asset은 아직 없었습니다. 이전 소스 작업은 게시 완료이고 Unity 생성·실행·Git 반영이 남은 상태입니다. 사용자 PC에서 이미 생성한 미커밋 파일은 이 환경에서 확인할 수 없습니다.
+현재 단계는4-A이며 아직4-B HUD로 넘어가지 않습니다. 이전269개 안내는 이번 모델 검증 회귀3개 추가로 **272개**로 갱신되었습니다.
 
 ## 먼저 실행할 작업
 
@@ -10,7 +16,7 @@
 2. Unity를 다시 실행해 Console의 컴파일 오류가 없는지 확인합니다.
 3. Play를 정지한 상태에서 상단 메뉴 **Tools > Urban Equation > Phase 4A > 1 Create Missing Prefabs and Bind Data**를 실행합니다.
 4. Console에 생성·연결 완료 메시지가 나타나면 **2 Validate Prefab Setup**을 실행합니다. 정상 메시지는 `Phase4-A Prefab Validation OK`입니다.
-5. Test Runner의 검색/필터를 해제하고 EditMode Run All을 실행합니다. 예상 전체 **269개**, 신규 클래스 **PrefabContractTests 26개**입니다. 메뉴 실행 전에도 테스트할 수 있으나 메뉴 실행 후 다시 확인하면 생성한 데이터 연결까지 검사됩니다.
+5. Test Runner의 검색/필터를 해제하고 EditMode Run All을 실행합니다. 예상 전체 **272개**, 신규 클래스 **PrefabContractTests 29개**입니다. 메뉴 실행 전에도 테스트할 수 있으나 메뉴 실행 후 다시 확인하면 생성한 데이터 연결까지 검사됩니다.
 6. **3 Prefab Gameplay Preview**를 실행합니다. 현재 수정한 씬이 있다면 Unity 저장 확인창에서 저장하거나 취소할 수 있습니다. 미리보기는 임시 씬이며 새로운 정식 씬 파일을 저장할 필요가 없습니다.
 7. Game 탭의 해상도 메뉴에서 **1920×1080**을 선택하고 필요하면 Maximize On Play를 켭니다. Play/Continue와 안내 OK는 왼쪽 디버그 패널, 실제 카드 드래그는 하단 카드 목록에서 합니다.
 8. 아래 Inspector 확인과 플레이 확인을 마친 뒤 Stop을 누릅니다. GitHub Desktop에서 생성된 프리팹·데이터 변경·이미지 `.meta`를 함께 Commit/Push합니다.
@@ -31,6 +37,7 @@
 | Assets/_UrbanEquation/Data/Presentation/ | GameplayPrefabs.asset | 카드·콤보 프리팹 참조 묶음 |
 
 Unity가 각 파일의 `.meta`와 새 폴더의 `.meta`를 함께 생성합니다. 이 파일들도 Git에 포함합니다.
+이미 이전 4-A 생성 메뉴를 실행하셨다면 **메뉴1 → 메뉴2**를 다시 실행해 주세요. 메뉴1이 B23001의 Visual Prefab을 최신 Skyscraper로 다시 연결합니다. 잘못된 모델이 연결되어 있으면 메뉴2가 기대 경로와 현재 경로를 오류로 보여 줍니다.
 기존 목적지 프리팹이 있으면 재생성하거나 덮어쓰지 않습니다. 레이아웃을 직접 수정한 뒤 메뉴를 재실행해도 프리팹 편집 내용은 유지됩니다.
 재실행은 지정된 데이터 참조와 이미지 import 설정을 다시 연결합니다. 같은 경로에 다른 종류의 asset이 있으면 오류를 표시합니다.
 도중 실패 시 이미 생성된 파일을 삭제하지 않습니다. Console에 표시된 원인을 해결하고 다시 실행합니다.
@@ -82,7 +89,7 @@ Fonts/Materials/Sprite 현재 폴더를 유지하고 Art 폴더를 만들지 않
 | B13001_LargeHouse.asset | Building_House_Middle | Spr_Ui_BHouse_001 |
 | B21001_SmallOffice.asset | Building_Office_Rounded | Spr_Ui_SOffice_001 |
 | B22001_MediumOffice.asset | Building_Office | Spr_Ui_MOffice_001 |
-| B23001_LargeOffice.asset | Building_House_Block | Spr_Ui_BOffice_001 |
+| B23001_LargeOffice.asset | Building_Skyscraper | Spr_Ui_BOffice_001 |
 | B31001_Restaurant.asset | Building_Restaurant | Spr_Ui_SRestaurant_001 |
 | B32001_Cafe.asset | Building_Cafe | Spr_Ui_MCafe_001 |
 | B33001_Casino.asset | Building_Casino | Spr_Ui_BCasino_001 |
@@ -151,7 +158,7 @@ Fonts/Materials/Sprite 현재 폴더를 유지하고 Art 폴더를 만들지 않
 - 신규: Editor/UrbanEquationPrefabFactory.cs·UrbanEquationPrefabSetup.cs, Scripts/Data/GameplayPrefabSet.cs, Scripts/UI/Gameplay/ComboPopupUI.cs·GameplayPrefabPreview.cs, Tests/Editor/PrefabContractTests.cs 및 각 meta.
 - 수정: Editor/UrbanEquationDebugMenu.cs(미리보기 메뉴), Scripts/Building/BuildingInstance.cs(외형 오프셋, 기존 기본값0), Docs/DEVELOPMENT_ROADMAP.md.
 - 기존 관리자의 게임 규칙과 테스트243개 파일, Prototype용 프리팹/씬, 임시 ScriptableObjects는 유지합니다. 삭제/이동 없음.
-- AI 확인: 입력 asset 경로/참조·C# 구문·테스트 선언269개·변경 범위 및 원격 반영.
+- AI 확인: 입력 asset 경로/참조·C# 구문·테스트 선언272개·변경 범위 및 원격 반영.
 - 이 환경에는 Unity/C# 컴파일러가 없어 에디터 생성 메뉴·실제 프리팹 import·EditMode·Play·렌더링은 사용자 Unity 실행 검증 대기입니다. 프리팹 파일은 메뉴 실행 시 사용자 프로젝트에서 생성됩니다.
 
 Unity API 참고: [SaveAsPrefabAsset](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/PrefabUtility.SaveAsPrefabAsset.html), [SaveAssetIfDirty](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/AssetDatabase.SaveAssetIfDirty.html), [InputSystemUIInputModule](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.19/api/UnityEngine.InputSystem.UI.InputSystemUIInputModule.html).

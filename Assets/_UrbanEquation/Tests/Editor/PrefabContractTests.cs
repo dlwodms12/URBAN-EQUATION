@@ -269,4 +269,34 @@ public class PrefabContractTests
         Assert.Throws<TargetInvocationException>(()=>Factory("CreateCombo",Sprite(),null,Font()));
         Assert.Throws<TargetInvocationException>(()=>Factory("CreateCombo",Sprite(),Sprite(),null));
     }
+
+    [Test] public void LatestLargeOfficeVisualAcceptsSkyscraperWithoutChangingShippedData()
+    {
+        var source=AssetDatabase.LoadAssetAtPath("Assets/_UrbanEquation/Data/Buildings/B23001_LargeOffice.asset",Runtime("BuildingData"));
+        var original=Get(source,"VisualPrefab");var building=Own(UObject.Instantiate(source));
+        var model=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/polyperfect/Low Poly Ultimate Pack/_T/Prefabs_T/Buildings_T/Building_Skyscraper.prefab");
+        Assert.That(model,Is.Not.Null);Set(building,"visualPrefab",model);
+        var errors=new List<string>();Editor("UrbanEquationPrefabSetup").GetMethod("ValidateBuildingVisual").Invoke(null,new object[]{building,errors});
+        Assert.That(errors,Is.Empty);Assert.That(Get(source,"VisualPrefab"),Is.SameAs(original));
+    }
+
+    [Test] public void LargeOfficeVisualRejectsLegacyHouseEvenWhenReferenceIsPresent()
+    {
+        var source=AssetDatabase.LoadAssetAtPath("Assets/_UrbanEquation/Data/Buildings/B23001_LargeOffice.asset",Runtime("BuildingData"));
+        var building=Own(UObject.Instantiate(source));
+        var house=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/polyperfect/Low Poly Ultimate Pack/_T/Prefabs_T/Buildings_T/Building_House_Block.prefab");
+        Assert.That(house,Is.Not.Null);Set(building,"visualPrefab",house);
+        var errors=new List<string>();Editor("UrbanEquationPrefabSetup").GetMethod("ValidateBuildingVisual").Invoke(null,new object[]{building,errors});
+        Assert.That(errors.Count,Is.EqualTo(1));Assert.That(errors[0],Does.Contain("B23001"));
+        Assert.That(errors[0],Does.Contain("Building_Skyscraper.prefab"));Assert.That(errors[0],Does.Contain("Building_House_Block.prefab"));
+    }
+
+    [Test] public void MissingLargeOfficeVisualReportsLatestModelPath()
+    {
+        var source=AssetDatabase.LoadAssetAtPath("Assets/_UrbanEquation/Data/Buildings/B23001_LargeOffice.asset",Runtime("BuildingData"));
+        var building=Own(UObject.Instantiate(source));Set(building,"visualPrefab",null);
+        var errors=new List<string>();Editor("UrbanEquationPrefabSetup").GetMethod("ValidateBuildingVisual").Invoke(null,new object[]{building,errors});
+        Assert.That(errors.Count,Is.EqualTo(1));Assert.That(errors[0],Does.Contain("Building_Skyscraper.prefab"));
+        Assert.That(errors[0],Does.Contain("<none>"));
+    }
 }

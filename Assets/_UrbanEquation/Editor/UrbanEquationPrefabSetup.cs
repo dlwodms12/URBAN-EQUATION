@@ -15,14 +15,14 @@ public static class UrbanEquationPrefabSetup
     private const string Models = "Assets/polyperfect/Low Poly Ultimate Pack/_T/Prefabs_T/";
     private const string Gui = "Assets/Space_Exploration_GUI_Kit/Containers/";
     private static readonly string[] TileNames = { "Asphalt", "Concrete", "Grass" };
-    // B23001 follows the document filename, explicitly confirmed by the user.
+    // B23001 follows Building_Skyscraper in the latest document (2026-10-03, page 13).
     private static readonly string[,] BuildingRows = {
         { "11001", "SmallHouse", "Building_House_Block", "SHouse" },
         { "12001", "MediumHouse", "Building_House_Family_Small", "MHouse" },
         { "13001", "LargeHouse", "Building_House_Middle", "BHouse" },
         { "21001", "SmallOffice", "Building_Office_Rounded", "SOffice" },
         { "22001", "MediumOffice", "Building_Office", "MOffice" },
-        { "23001", "LargeOffice", "Building_House_Block", "BOffice" },
+        { "23001", "LargeOffice", "Building_Skyscraper", "BOffice" },
         { "31001", "Restaurant", "Building_Restaurant", "SRestaurant" },
         { "32001", "Cafe", "Building_Cafe", "MCafe" },
         { "33001", "Casino", "Building_Casino", "BCasino" },
@@ -66,7 +66,7 @@ public static class UrbanEquationPrefabSetup
         }
         for (int i = 0; i < 15; i++)
         {
-            models[i] = Load<GameObject>(Models + "Buildings_T/" + BuildingRows[i,2] + ".prefab");
+            models[i] = Load<GameObject>(BuildingModel(i));
             buildings[i] = Load<BuildingData>(Root + "Data/Buildings/B" + BuildingRows[i,0] + "_" + BuildingRows[i,1] + ".asset");
             if (models[i] == null || buildings[i] == null) errors.Add("Missing building input: " + BuildingRows[i,0]);
             else if (content != null && content.Buildings != null && (!content.Buildings.TryGetBuilding(int.Parse(BuildingRows[i,0]), out BuildingData canonical)
@@ -151,8 +151,11 @@ public static class UrbanEquationPrefabSetup
             if (content.BuildingPrefab == null || AssetDatabase.GetAssetPath(content.BuildingPrefab) != BuildingRootPath)
                 errors.Add("GameContent must reference the new BuildingRoot prefab.");
             if (content.Buildings != null) foreach (BuildingData building in content.Buildings.Buildings)
-                if (building != null && (building.VisualPrefab == null || building.CardImage == null))
-                    errors.Add("Visual/card image is missing: " + building.Code);
+                if (building != null)
+                {
+                    ValidateBuildingVisual(building,errors);
+                    if (building.CardImage == null) errors.Add("Card image is missing: " + building.Code);
+                }
         }
         CheckView(CardPath,typeof(BuildingCardUI),new[]{"buildingNameText","cardImage","disabledOverlay","button"},errors);
         CheckView(ComboPath,typeof(ComboPopupUI),new[]{"comboNameText","descriptionText","rewardsText","canvasGroup"},errors);
@@ -160,6 +163,22 @@ public static class UrbanEquationPrefabSetup
     }
 
     public static string TilePath(int index) => Root + "Prefabs/Gameplay/Tiles/Pfb_Tile_" + TileNames[index] + "_001.prefab";
+    public static void ValidateBuildingVisual(BuildingData building, List<string> errors)
+    {
+        if (building == null) { errors.Add("Building data is missing."); return; }
+        for (int i = 0; i < BuildingRows.GetLength(0); i++)
+        {
+            if (BuildingRows[i,0] != building.BuildingCode.ToString()) continue;
+            string path = BuildingModel(i);
+            var expected = Load<GameObject>(path);
+            if (expected == null || building.VisualPrefab != expected)
+                errors.Add("Building visual mismatch: " + building.Code + " expected " + path
+                    + "; found " + (building.VisualPrefab == null ? "<none>" : AssetDatabase.GetAssetPath(building.VisualPrefab)));
+            return;
+        }
+        errors.Add("Building visual mapping is missing: " + building.Code);
+    }
+    private static string BuildingModel(int i) => Models + "Buildings_T/" + BuildingRows[i,2] + ".prefab";
     private static string BuildingImage(int i) => Root + "Sprite/Building_Image/Spr_Ui_" + BuildingRows[i,3] + "_001.png";
     private static T Load<T>(string path) where T : UnityEngine.Object => AssetDatabase.LoadAssetAtPath<T>(path);
     private static Sprite FirstSprite(string path) => AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().FirstOrDefault();
