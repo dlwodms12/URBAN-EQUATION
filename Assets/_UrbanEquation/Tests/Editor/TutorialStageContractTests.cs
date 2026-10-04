@@ -19,6 +19,7 @@ public class TutorialStageContractTests
     private static object Field(object target, string name) => target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(target);
     private static void Set(object target, string name, object value) => target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(target, value);
     private static object Call(object target, string name, params object[] args) => target.GetType().GetMethod(name).Invoke(target, args);
+    private static void Life(object target, string method) => target.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic).Invoke(target, null);
     private static object[] Items(object value) => ((IEnumerable)value).Cast<object>().ToArray();
     private T Own<T>(T value) where T : UObject { owned.Add(value); return value; }
     private static ScriptableObject Content => (ScriptableObject)AssetDatabase.LoadAssetAtPath("Assets/_UrbanEquation/Data/GameContent.asset", Runtime("GameContentData"));
@@ -57,7 +58,10 @@ public class TutorialStageContractTests
         var data = AssetDatabase.LoadAssetAtPath("Assets/_UrbanEquation/Data/Presentation/GameplayHud.asset", Runtime("GameplayHudSet"));
         var prefab = (Component)Get(data, "HudPrefab");
         var hud = Own(UObject.Instantiate(prefab.gameObject)).GetComponent(Runtime("GameHudUI"));
-        Call(hud, "Bind", Session(game), Flow(game), null, null); return hud;
+        Call(hud, "Bind", Session(game), Flow(game), null, null);
+        // EditMode does not guarantee play-only activation callbacks for HUD children.
+        foreach (string field in new[] { "hand", "undoView", "nextView", "automaticCombo", "boardDetails" }) Life(Field(hud, field), "OnEnable");
+        return hud;
     }
     private static bool Review(Component hud, Component game, object result)
     {
@@ -110,7 +114,7 @@ public class TutorialStageContractTests
     [TestCase(12001,32001,12001,0,2,false)]
     [TestCase(22001,32001,22001,1,2,false)]
     [TestCase(22001,42001,32001,2,2,false)]
-    [TestCase(12001,52001,52001,4,2,false)]
+    [TestCase(32001,52001,52001,4,2,false)]
     public void NewInteractionsUseExactUnorderedPairsAndSignedResources(int a, int b, int code, int resource, int amount, bool complaint)
     {
         object database = Get(Content, "Combos");
@@ -141,29 +145,48 @@ public class TutorialStageContractTests
         }
         Assert.That(Resources(game), Is.EqualTo(resources)); Assert.That(Items(Get(Get(Session(game), "Hand"), "Cards")).Length, Is.EqualTo(9));
     }
-    [Test] public void StageFourOriginalSolutionIncludesFactoryAtTwoTwoAndThreePositivePairs()
+    [Test] public void StageFourOriginalSolutionIncludesFactoryAtTwoTwoAndFourPositivePairs()
     {
-        var game = Start(4); StageFourSolution(game); Assert.That(Count(game,false), Is.EqualTo(3)); Assert.That(Count(game,true), Is.Zero);
-        Assert.That(Resources(game), Is.EqualTo(new[] {7,7,7,5,5})); Assert.That(Goals(game), Is.EqualTo(new[] {true,false,true}));
+        var game = Start(4); StageFourSolution(game); Assert.That(Count(game,false), Is.EqualTo(4)); Assert.That(Count(game,true), Is.Zero);
+        Assert.That(Resources(game), Is.EqualTo(new[] {7,7,7,5,7})); Assert.That(Goals(game), Is.EqualTo(new[] {true,false,true}));
         Assert.That(Review(Hud(game), game, Results(game)[0]), Is.True); Assert.That(Get(Stage(game), "Rank"), Is.EqualTo(3));
     }
-    [Test] public void StageFiveOriginalSolutionHasThreeComplaintsAndOnePositivePair()
+    [Test] public void StageFiveOriginalSolutionHasThreeComplaintsAndTwoPositivePairs()
     {
-        var game = Start(5); StageFiveSolution(game); Assert.That(Count(game,true), Is.EqualTo(3)); Assert.That(Count(game,false), Is.EqualTo(1));
-        Assert.That(Resources(game), Is.EqualTo(new[] {11,10,10,9,9})); Assert.That(Goals(game), Is.EqualTo(new[] {true,false,true}));
+        var game = Start(5); StageFiveSolution(game); Assert.That(Count(game,true), Is.EqualTo(3)); Assert.That(Count(game,false), Is.EqualTo(2));
+        Assert.That(Resources(game), Is.EqualTo(new[] {11,10,10,9,11})); Assert.That(Goals(game), Is.EqualTo(new[] {true,false,true}));
         Assert.That(Review(Hud(game), game, Results(game).First(r => (bool)Get(r,"IsComplaint"))), Is.True);
         Assert.That(Goals(game), Is.EqualTo(new[] {true,true,true}));
     }
     [Test] public void AutomaticComplaintPopupNeverCompletesManualReviewGoal()
     {
         var game = Start(5); var hud = Hud(game); StageFiveSolution(game);
-        Assert.That(Get(Field(hud,"automaticCombo"), "CurrentResult"), Is.Not.Null);
+        object popup = Field(hud,"automaticCombo"); int[] before = Resources(game);
+        Assert.That(Get(popup, "CurrentResult"), Is.SameAs(Results(game)[0]));
+        foreach (object result in Results(game))
+        {
+            Assert.That(Get(popup,"CurrentResult"), Is.SameAs(result));
+            Assert.That(Call(popup,"TryCompleteCurrent"), Is.True);
+            Assert.That(Goals(game)[1], Is.False);
+        }
+        Assert.That(Get(popup,"CurrentResult"), Is.Null);
+        Assert.That(Resources(game), Is.EqualTo(before));
         Assert.That(Goals(game)[1], Is.False); Assert.That(Get(Call(Stage(game),"CaptureProgressState"),"ComplaintReviewed"), Is.False);
+    }
+    [Test] public void TouristCafeDoesNotMatchFormerHouseTemplePair()
+    {
+        object database = Get(Content, "Combos");
+        foreach (var pair in new[] { new[] { 12001,52001 }, new[] { 52001,12001 } })
+        {
+            object[] args = { pair[0], pair[1], null };
+            Assert.That(Call(database,"TryGetCombo",args), Is.False);
+            Assert.That(args[2], Is.Null);
+        }
     }
     [Test] public void ReviewingPositiveComboDoesNotMeetComplaintReviewGoal()
     {
         var game = Start(5); StageFiveSolution(game); var hud = Hud(game);
-        Assert.That(Review(hud, game, Results(game).Single(r => !(bool)Get(r,"IsComplaint"))), Is.True);
+        Assert.That(Review(hud, game, Results(game).First(r => !(bool)Get(r,"IsComplaint"))), Is.True);
         Assert.That(Goals(game)[1], Is.False);
     }
     [Test] public void RepeatedManualReviewDoesNotRepayResourcesIncreaseCountsOrAddTurns()
@@ -194,7 +217,9 @@ public class TutorialStageContractTests
     {
         var game = Start(4); StageFourSolution(game,4); Assert.That(Review(Hud(game),game,Results(game)[0]), Is.True);
         Build(game,42001,2,2); Command(Get(Session(game),"History"),"TryUndo");
-        Assert.That(Count(game,false), Is.EqualTo(2)); Assert.That(Goals(game), Is.EqualTo(new[] {true,true,false}));
+        Assert.That(Count(game,false), Is.EqualTo(3)); Assert.That(Goals(game), Is.EqualTo(new[] {true,true,true}));
+        Command(Get(Session(game),"History"),"TryUndo");
+        Assert.That(Count(game,false), Is.EqualTo(2)); Assert.That(Goals(game), Is.EqualTo(new[] {true,false,false}));
     }
     [Test] public void RemovedPairResultCannotBeConfirmedAfterUndo()
     {
@@ -240,11 +265,11 @@ public class TutorialStageContractTests
     }
     [Test] public void DuplicateResultEntriesNeverCountAsAdditionalPairs()
     {
-        var game = Start(4); StageFourSolution(game,4);
+        var game = Start(4); StageFourSolution(game,3);
         object[] capture = { null, null }; Assert.That(Call(Get(Session(game),"Board"),"TryCaptureBuildings",capture), Is.True);
         object[] results = Results(game); var repeated = Array.CreateInstance(Runtime("ComboResult"), results.Length * 2);
         for (int i = 0; i < repeated.Length; i++) repeated.SetValue(results[i % results.Length], i);
-        object[] args = { Data(4), capture[0], Call(Get(Session(game),"Resources"),"CaptureResourceState"), 1, repeated, false, false, null, null };
+        object[] args = { Data(4), capture[0], Call(Get(Session(game),"Resources"),"CaptureResourceState"), 2, repeated, false, false, null, null };
         Assert.That(Runtime("StageGoalEvaluator").GetMethod("TryEvaluateStageWithInteractions").Invoke(null,args), Is.True,args[8] as string);
         Assert.That(Get(args[7],"GoalStates"), Is.EqualTo(new[] {true,false,false}));
     }

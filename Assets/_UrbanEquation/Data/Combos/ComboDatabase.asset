@@ -312,7 +312,7 @@ MonoBehaviour:
   - comboCode: 52001
     comboName: "관광지 카페"
     description: "모두 손에 커피를 들고 다니네요."
-    buildingCodeA: 12001
+    buildingCodeA: 32001
     buildingCodeB: 52001
     rewards:
     - resource: 4

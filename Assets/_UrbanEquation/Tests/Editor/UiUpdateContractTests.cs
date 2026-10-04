@@ -18,6 +18,7 @@ public class UiUpdateContractTests
     private static object Get(object target, string name) => target.GetType().GetProperty(name).GetValue(target);
     private static object Field(object target, string name) => target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(target);
     private static object Call(object target, string name, params object[] args) => target.GetType().GetMethod(name).Invoke(target, args);
+    private static void Life(object target, string method) => target.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic).Invoke(target, null);
     private static object[] Items(object value) => ((IEnumerable)value).Cast<object>().ToArray();
     private T Own<T>(T value) where T : UObject { owned.Add(value); return value; }
     private static UObject Asset(string path, string type) => AssetDatabase.LoadAssetAtPath(path, Runtime(type));
@@ -41,7 +42,10 @@ public class UiUpdateContractTests
     {
         var data=Asset("Assets/_UrbanEquation/Data/Presentation/GameplayHud.asset","GameplayHudSet");
         var prefab=(Component)Get(data,"HudPrefab"); var hud=Own(UObject.Instantiate(prefab.gameObject)).GetComponent(Runtime("GameHudUI"));
-        Call(hud,"Bind",Session(game),Flow(game),null,null); return hud;
+        Call(hud,"Bind",Session(game),Flow(game),null,null);
+        // EditMode does not guarantee play-only activation callbacks for HUD children.
+        foreach (string field in new[] { "hand", "undoView", "nextView", "automaticCombo", "boardDetails" }) Life(Field(hud, field), "OnEnable");
+        return hud;
     }
     private Component Screens(Component game)
     {
@@ -119,6 +123,7 @@ public class UiUpdateContractTests
     {
         var game=Game(5);var hud=Hud(game);Build(game,1,1,1);Build(game,2,1,2);
         var popup=(Component)Field(hud,"automaticCombo");Assert.That(Get(FirstResult(game),"IsComplaint"),Is.True);
+        Assert.That(Get(popup,"CurrentResult"),Is.SameAs(FirstResult(game)));
         Assert.That(popup.GetComponent<Image>().sprite,Is.SameAs(Get(Settings,"ComplaintBackground")));
         Assert.That(popup.transform.Find("ComboHeader").GetComponent<Image>().sprite,Is.SameAs(Get(Settings,"ComplaintHeader")));
         var strip=(Component)Field(popup,"rewardsView");

@@ -1,6 +1,6 @@
 # 스테이지 확장 기반과 검증 절차
 
-> 이 문서는 확장 기반을 만들었을 당시의 2개 콘텐츠·440개 테스트 기준 기록입니다. 사용자가 검증을 완료해 main에 병합했습니다. 현재는 정식 Stage1~5와 505개 테스트이며 최신 Pull/검증 절차는 `Docs/V020_TUTORIAL_UPDATE.md`와 `Docs/DEVELOPMENT_ROADMAP.md`를 사용합니다. 아래 저장 호환 설계는 현재도 유효합니다.
+> 이 문서는 확장 기반을 만들었을 당시의 2개 콘텐츠·440개 테스트 기준 기록입니다. 사용자가 검증을 완료해 main에 병합했습니다. 현재는 정식 Stage1~5와 506개 테스트이며 최신 Pull/검증 절차는 `Docs/V020_TUTORIAL_UPDATE.md`와 `Docs/DEVELOPMENT_ROADMAP.md`를 사용합니다. 아래 저장 호환 설계는 현재도 유효합니다.
 
 기준: 2026-10-04, main `c9d86c0bf547ae666cda3b9439b0ffcb8f05cd5c` ([v0.10]Build).
 브랜치: `codex/stage-expansion-support`.
