@@ -17,6 +17,10 @@ public sealed class ComboResult
     public Vector2Int Direction => AdjacentCoordinate - SourceCoordinate;
     public Vector3 PresentationPosition { get; }
     public IReadOnlyList<ResourceAmount> Rewards { get; }
+    public bool IsComplaint
+    {
+        get { foreach (ResourceAmount reward in Rewards) if (reward.Amount < 0) return true; return false; }
+    }
 
     internal ComboResult(object owner, int resultId, int comboCode, string name, string description,
         int buildingCodeA, int buildingCodeB, Vector2Int source, Vector2Int adjacent,
@@ -37,4 +41,3 @@ public sealed class ComboResult
         Rewards = Array.AsReadOnly(copy);
     }
 }
-

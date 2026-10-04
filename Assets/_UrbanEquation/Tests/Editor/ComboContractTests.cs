@@ -572,7 +572,7 @@ public class ComboContractTests
     }
 
     [Test]
-    public void AuthoredGddDatabaseImportsThirtyUniquePairsIncludingSharedSpecialCode()
+    public void AuthoredGddDatabaseImportsThirtyEightUniquePairsIncludingSharedSpecialCode()
     {
         var database = AssetDatabase.LoadAssetAtPath(
             "Assets/_UrbanEquation/Data/Combos/ComboDatabase.asset", RuntimeType("ComboDatabase"));
@@ -580,7 +580,7 @@ public class ComboContractTests
         var errors = new List<string>();
         Call(database, "Validate", errors);
         Assert.That(errors, Is.Empty);
-        Assert.That(((IList)Get(database, "Combos")).Count, Is.EqualTo(30));
+        Assert.That(((IList)Get(database, "Combos")).Count, Is.EqualTo(38));
         string[] resourceNames = { "Population", "Jobs", "Money", "Logistics", "Tourism" };
         int[] first = { 11001, 21001, 31001, 41001, 51001 };
         foreach (int building in first)

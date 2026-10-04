@@ -106,10 +106,10 @@ public class StageIntegrationContractTests
 
     [TestCase(11001,"0,1,0,0,0","1,0,0,0,0","0,1,2")]
     [TestCase(12001,"0,2,0,0,0","2,0,0,0,0","1,2")]
-    [TestCase(13001,"0,3,0,0,1","3,0,1,0,0","1")]
-    [TestCase(21001,"0,0,1,0,0","0,1,0,0,0","0,1")]
+    [TestCase(13001,"0,3,0,0,1","3,0,1,0,0","2")]
+    [TestCase(21001,"0,0,1,0,0","0,1,0,0,0","0,1,2")]
     [TestCase(22001,"0,0,2,0,0","0,2,0,0,0","0,1")]
-    [TestCase(23001,"0,0,3,1,0","1,3,0,0,0","1")]
+    [TestCase(23001,"0,0,3,1,0","1,3,0,0,0","0")]
     [TestCase(31001,"0,0,0,1,0","0,0,1,0,0","0,1,2")]
     [TestCase(32001,"0,0,0,2,0","0,0,2,0,0","1,2")]
     [TestCase(33001,"1,0,0,3,0","0,0,3,0,1","0,1")]
@@ -150,7 +150,7 @@ public class StageIntegrationContractTests
         var errors = new List<string>(); Call(Content,"Validate",errors);
         Assert.That(errors, Is.Empty);
         Assert.That(Get(Get(Content,"Stages"),"Count"), Is.GreaterThanOrEqualTo(2));
-        Assert.That(Items(Get(Get(Content,"Combos"),"Combos")).Length, Is.EqualTo(30));
+        Assert.That(Items(Get(Get(Content,"Combos"),"Combos")).Length, Is.EqualTo(38));
     }
     [Test] public void StageOneGoalTargetsArePopulationOneTwoAndThree()
     {

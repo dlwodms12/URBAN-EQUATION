@@ -1,5 +1,7 @@
 # 스테이지 확장 기반과 검증 절차
 
+> 이 문서는 확장 기반을 만들었을 당시의 2개 콘텐츠·440개 테스트 기준 기록입니다. 사용자가 검증을 완료해 main에 병합했습니다. 현재는 정식 Stage1~5와 505개 테스트이며 최신 Pull/검증 절차는 `Docs/V020_TUTORIAL_UPDATE.md`와 `Docs/DEVELOPMENT_ROADMAP.md`를 사용합니다. 아래 저장 호환 설계는 현재도 유효합니다.
+
 기준: 2026-10-04, main `c9d86c0bf547ae666cda3b9439b0ffcb8f05cd5c` ([v0.10]Build).
 브랜치: `codex/stage-expansion-support`.
 
@@ -61,11 +63,11 @@ AI 환경에서 C# 구문, 변경하지 않은 파일의 해시, 테스트 선�
 ## 검증 후 새 스테이지 제작
 
 1. Project의 **Assets/_UrbanEquation/Data/Stages/**에서 우클릭 → **Create → Urban Equation → Stage Data**를 선택합니다.
-2. 이름을 `Stage03.asset` 등으로 정하고 Stage Number를 해당 번호로 설정합니다. Stage Name·Introduction을 입력합니다.
+2. 현재 Stage01~05가 등록되어 있으므로 다음 이름을 `Stage06.asset` 등으로 정하고 Stage Number를 해당 번호로 설정합니다. Stage Name·Introduction을 입력합니다.
 3. Width/Height를 정하고 Tiles에 정확히 Width×Height개의 TileData를 지정합니다. **북쪽 행부터, 각 행은 서쪽→동쪽**입니다. 타일 정의는 **Assets/_UrbanEquation/Data/Tiles/**에 있습니다.
 4. Initial Resources에 Population/Jobs/Money/Logistics/Tourism 다섯 종류를 각각 한 번씩, 0 이상으로 입력합니다.
 5. Building Cards에는 **Assets/_UrbanEquation/Data/Buildings/**의 정식 건물과 양수 수량을 지정합니다. 입력 순서대로 수량만큼 카드가 생성됩니다. **Assets/ScriptableObjects/**의 임시 Prototype 데이터는 사용하지 않습니다.
-6. 필수 목표 한 개와 추가 목표 두 개를 입력합니다. Description은 표시 문구이며 실제 조건은 Goal Type·Resource Target·Building A/B에서 설정합니다.
+6. 필수 목표 한 개와 추가 목표 두 개를 입력합니다. Description은 표시 문구이며 실제 조건은 Goal Type·Resource Target·Building A/B에서 설정합니다. 신규 개수 목표는 Target Count, 직접 조회 목표는 Combo Reviewed/Complaint Reviewed를 사용합니다. Each Tile Type Built는 세 타일 종류 각각에 건설되었는지 검사합니다.
 7. 같은 폴더의 **StageCatalog.asset**을 선택해 Stages 배열 끝에 추가합니다. Stage01부터 번호와 배열 순서가 연속해야 합니다.
 8. **Assets/_UrbanEquation/Data/GameContent.asset**의 Stage Catalog 참조를 유지합니다. 새 스테이지마다 씬이나 Build Scene List 항목은 필요하지 않습니다.
 9. 저장 후 Audit·전체 EditMode를 다시 실행합니다. 신규 스테이지의 클리어 가능성·별점별 해답·자원 흐름 테스트는 실제 기획 데이터에 맞춰 별도로 추가해야 합니다.

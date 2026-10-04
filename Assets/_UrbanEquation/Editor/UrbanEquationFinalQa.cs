@@ -37,8 +37,19 @@ public static class UrbanEquationFinalQa
         if(content!=null)
         {
             if(content.Buildings==null || content.Buildings.Buildings.Count!=15) errors.Add("Final content requires the existing fifteen building definitions.");
-            if(content.Combos==null || content.Combos.Combos.Count!=30) errors.Add("Final content requires the existing thirty combo definitions.");
+            if(content.Combos==null || content.Combos.Combos.Count!=38) errors.Add("Final content requires the thirty-four combos and four Complaints.");
             ValidateStageCatalog(content.Stages,errors);
+        }
+        var ui = AssetDatabase.LoadAssetAtPath<GameUiUpdateSettings>("Assets/_UrbanEquation/Data/Presentation/GameUiUpdate.asset");
+        if (ui == null) errors.Add("GameUiUpdate.asset is missing."); else ui.Validate(errors);
+        foreach (string path in new[] { UrbanEquationHudSetup.HudPath, UrbanEquationScreensSetup.ScreensPath })
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (prefab == null) continue;
+            UnityEngine.Object view = path == UrbanEquationHudSetup.HudPath
+                ? (UnityEngine.Object)prefab.GetComponent<GameHudUI>() : prefab.GetComponent<GameScreensUI>();
+            if (view != null && new SerializedObject(view).FindProperty("uiUpdate").objectReferenceValue != ui)
+                errors.Add("UI update reference is missing: " + path);
         }
         var paths=new[]{UrbanEquationHudSetup.HudPath,UrbanEquationScreensSetup.ScreensPath,
             "Assets/_UrbanEquation/Prefabs/UI/Cards/BuildingCard.prefab",

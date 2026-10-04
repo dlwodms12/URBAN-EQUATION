@@ -27,7 +27,7 @@ MonoBehaviour:
     amount: 3
   - resource: 0
     amount: 1
-  allowedTileTypes: 01000000
+  allowedTileTypes: 00000000
   produceResource: 0
   produceAmount: 0
   consumeResource: 0

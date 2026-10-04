@@ -179,7 +179,7 @@ public class GameSessionManager : MonoBehaviour
 
             Action applyGoals = () => { }, publishGoals = () => { };
             if (stageManager != null && stageManager.IsConfigured
-                && !stageManager.TryPrepareGoalEvaluation(out applyGoals, out publishGoals, out error))
+                && !stageManager.TryPrepareBuildGoalEvaluation(comboResults, out applyGoals, out publishGoals, out error))
             {
                 resourceManager.TryPrepareResourceRestore(resourcesBefore, out Action rollbackResources, out _);
                 rollbackResources();

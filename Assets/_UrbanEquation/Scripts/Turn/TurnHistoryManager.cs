@@ -123,6 +123,16 @@ public class TurnHistoryManager : MonoBehaviour
         OnHistoryChanged?.Invoke();
     }
 
+    internal void UpdateCurrentProgress()
+    {
+        EnsureScope();
+        if (!configured || restoring || snapshots.Count == 0 || stageManager == null) return;
+        GameStateSnapshot current = snapshots[snapshots.Count - 1];
+        snapshots[snapshots.Count - 1] = new GameStateSnapshot(ownerToken, current.TurnNumber,
+            current.Buildings, current.Resources, current.Cards, current.Combos,
+            current.LastBuildCombos, stageManager.CaptureProgressState());
+    }
+
     internal void NotifyConfigurationChanged() => EnsureScope();
     internal void NotifyGameplayStateChanged() => OnHistoryChanged?.Invoke();
 

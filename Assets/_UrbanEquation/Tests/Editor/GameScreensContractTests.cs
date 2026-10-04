@@ -178,8 +178,8 @@ public class GameScreensContractTests
     }
     [Test] public void ExitCancelReturnsToLobbyWithoutRequestingQuit()
     { var game=Bootstrap();var view=Bound(game);Ui(view,"TryRequestExit");Assert.That(Ui(view,"TryCancel"),Is.True);Assert.That(State(Flow(game)),Is.EqualTo("Lobby"));Assert.That(Get(Flow(game),"QuitRequested"),Is.False); }
-    [Test] public void StageListUsesActualTwoStageCatalog()
-    { var view=Bound(Bootstrap());Assert.That(Get(view,"StageRowCount"),Is.EqualTo(2)); }
+    [Test] public void StageListUsesActualAuthoredCatalog()
+    { var game=Bootstrap();var view=Bound(game);Assert.That(Get(view,"StageRowCount"),Is.EqualTo(Get(Flow(game),"StageCount"))); }
     [Test] public void StageTwoHasLockIconAndNoInputBeforeUnlock()
     { var game=Playing();Command(Flow(game),"TryRequestPause");Command(Flow(game),"TryConfirmPause");Command(Flow(game),"TryContinue");var view=Bound(game);var row=Items(Field(view,"rows"))[1];Assert.That(Get(row,"IsUnlocked"),Is.False);Assert.That(((Button)Field(row,"selectButton")).interactable,Is.False);Assert.That(((Image)Field(row,"selectIcon")).sprite,Is.SameAs(Field(row,"lockIcon")));Assert.That(Call(view,"TrySelectStage",2),Is.False); }
     [Test] public void StageListShowsSavedHighestRankStars()
@@ -198,11 +198,12 @@ public class GameScreensContractTests
     { var game=Cleared();var view=Bound(game);Assert.That(Ui(view,"TryRetry"),Is.True);Assert.That(State(Flow(game)),Is.EqualTo("StageIntro"));Assert.That(Items(Get(Get(Session(game),"Hand"),"Cards")).Length,Is.EqualTo(2));Assert.That(Get(Get(Session(game),"History"),"CanUndo"),Is.False); }
     [Test] public void NextOpensUnlockedStageTwo()
     { var game=Cleared();var view=Bound(game);Assert.That(Button(view,"nextButton").interactable,Is.True);Assert.That(Ui(view,"TryNextStage"),Is.True);Assert.That(Get(Flow(game),"SelectedStageNumber"),Is.EqualTo(2));Assert.That(State(Flow(game)),Is.EqualTo("StageIntro")); }
-    [Test] public void LastStageDisablesNextAndAllowsStageSelect()
+    [Test] public void StageTwoNavigationFollowsActualStageCount()
     {
         var game=Cleared();Command(Flow(game),"TryNextStage");Command(Flow(game),"TryDismissIntro");
         Build(game,1,0,0);Build(game,5,0,1);Build(game,4,0,2);Build(game,3,1,0);Build(game,2,1,2);Command(Flow(game),"TryCompleteStage");
-        var view=Bound(game);Assert.That(Button(view,"nextButton").interactable,Is.False);Assert.That(Button(view,"clearSelectButton").interactable,Is.True);Assert.That(Ui(view,"TryNextStage"),Is.False);
+        var view=Bound(game);bool hasNext=(int)Get(Flow(game),"StageCount")>2;
+        Assert.That(Button(view,"nextButton").interactable,Is.EqualTo(hasNext));Assert.That(Button(view,"clearSelectButton").interactable,Is.True);Assert.That(Ui(view,"TryNextStage"),Is.EqualTo(hasNext));
     }
     [Test] public void ClearStageSelectReturnsSavedRanks()
     { var game=Cleared();var view=Bound(game);Assert.That(Ui(view,"TryReturnToStageSelect"),Is.True);Assert.That(State(Flow(game)),Is.EqualTo("StageSelect"));Assert.That(Call(Flow(game),"GetBestRank",1),Is.EqualTo(3));Assert.That(Call(Flow(game),"IsStageUnlocked",2),Is.True); }

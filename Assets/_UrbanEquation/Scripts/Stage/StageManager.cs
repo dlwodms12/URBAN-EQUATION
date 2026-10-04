@@ -34,7 +34,7 @@ public class StageManager : MonoBehaviour
     internal void NotifyGameplayStateChanged() => OnStateChanged?.Invoke();
 
     public StageProgressState CaptureProgressState() => new StageProgressState(
-        isCleared, progress.GoalStates, progress.Rank, progress.NextStageAvailable);
+        isCleared, progress.GoalStates, progress.Rank, progress.NextStageAvailable, progress.ComboReviewed, progress.ComplaintReviewed);
 
     public bool TryConfigure(StageData stage, BoardManager board, ResourceManager resources,
         BuildingHandManager hand, out string error)
@@ -42,7 +42,7 @@ public class StageManager : MonoBehaviour
         error = null;
         if (changing || (ownerSession != null && ownerSession.IsBusy))
         { error = "Cannot configure stage during a transaction."; return false; }
-        if (!TryEvaluateContext(stage, board, resources, hand, out StageProgressState initial, out error))
+        if (!TryEvaluateContext(stage, board, resources, hand, out StageProgressState initial, out error, null, false, false))
             return false;
         if (ownerSession != null && (ownerSession.Board != board || ownerSession.Resources != resources
             || ownerSession.Hand != hand))
@@ -98,12 +98,18 @@ public class StageManager : MonoBehaviour
 
     internal bool TryPrepareGoalEvaluation(out Action apply, out Action publish, out string error)
     {
+        return TryPrepareBuildGoalEvaluation(new ComboResult[0], out apply, out publish, out error);
+    }
+
+    internal bool TryPrepareBuildGoalEvaluation(IReadOnlyList<ComboResult> pending,
+        out Action apply, out Action publish, out string error)
+    {
         apply = null;
         publish = null;
         if (!configured || isCleared)
         { error = "Cannot evaluate this stage."; return false; }
         if (!TryEvaluateContext(stageData, boardManager, resourceManager, buildingHand,
-            out StageProgressState next, out error)) return false;
+            out StageProgressState next, out error, pending)) return false;
         if (TryPrepareProgressRestore(next, out apply, out publish)) return true;
         error = "Evaluated progress is invalid.";
         return false;
@@ -130,7 +136,7 @@ public class StageManager : MonoBehaviour
                 error = "The required goal is not achieved.";
                 return false;
             }
-            progress = new StageProgressState(true, latest.GoalStates, latest.Rank, false);
+            progress = new StageProgressState(true, latest.GoalStates, latest.Rank, false, latest.ComboReviewed, latest.ComplaintReviewed);
             isCleared = true;
             CurrentResult = new StageResult(stageData, progress, resourceManager.CaptureResourceState());
             result = CurrentResult;
@@ -186,14 +192,16 @@ public class StageManager : MonoBehaviour
     private static bool SameProgress(StageProgressState a, StageProgressState b)
     {
         if (a.IsCleared != b.IsCleared || a.Rank != b.Rank || a.NextStageAvailable != b.NextStageAvailable
-            || a.GoalStates.Count != b.GoalStates.Count) return false;
+            || a.GoalStates.Count != b.GoalStates.Count || a.ComboReviewed != b.ComboReviewed
+            || a.ComplaintReviewed != b.ComplaintReviewed) return false;
         for (int i = 0; i < a.GoalStates.Count; i++)
             if (a.GoalStates[i] != b.GoalStates[i]) return false;
         return true;
     }
 
-    private static bool TryEvaluateContext(StageData stage, BoardManager board, ResourceManager resources,
-        BuildingHandManager hand, out StageProgressState evaluated, out string error)
+    private bool TryEvaluateContext(StageData stage, BoardManager board, ResourceManager resources,
+        BuildingHandManager hand, out StageProgressState evaluated, out string error,
+        IReadOnlyList<ComboResult> pending = null, bool? comboReviewed = null, bool? complaintReviewed = null)
     {
         evaluated = null;
         error = null;
@@ -202,8 +210,39 @@ public class StageManager : MonoBehaviour
             || hand == null || !hand.IsInitialized || hand.Resources != resources)
         { error = "Goals require the current initialized board, resources and hand."; return false; }
         if (!board.TryCaptureBuildings(out BuildingStateSnapshot[] buildings, out error)) return false;
-        return StageGoalEvaluator.TryEvaluateStage(stage, buildings, resources.CaptureResourceState(),
-            hand.Cards.Count, out evaluated, out error);
+        var interactions = new List<ComboResult>();
+        if (ownerSession != null && ownerSession.Combos != null)
+            interactions.AddRange(ownerSession.Combos.CaptureResults());
+        if (pending != null) interactions.AddRange(pending);
+        return StageGoalEvaluator.TryEvaluateStageWithInteractions(stage, buildings, resources.CaptureResourceState(),
+            hand.Cards.Count, interactions, comboReviewed ?? progress.ComboReviewed,
+            complaintReviewed ?? progress.ComplaintReviewed, out evaluated, out error);
+    }
+
+    // Only a manual two-building lookup can satisfy this tutorial goal.
+    public bool TryConfirmInteraction(ComboResult result, out string error)
+    {
+        error = null;
+        if (!configured || isCleared || changing || ownerSession == null || ownerSession.IsBusy
+            || !GameplayEnabled || result == null || ownerSession.Combos == null
+            || !ownerSession.Combos.TryGetAppliedCombo(result.SourceCoordinate, result.AdjacentCoordinate,
+                out ComboResult current) || current != result)
+        { error = "Review requires a current interaction in an idle playing stage."; return false; }
+        bool reviewedCombo = progress.ComboReviewed || !result.IsComplaint;
+        bool reviewedComplaint = progress.ComplaintReviewed || result.IsComplaint;
+        if (!TryEvaluateContext(stageData, boardManager, resourceManager, buildingHand,
+            out StageProgressState next, out error, null, reviewedCombo, reviewedComplaint)) return false;
+        if (!TryPrepareProgressRestore(next, out Action apply, out Action publish))
+        { error = "Reviewed progress is invalid."; return false; }
+        changing = true;
+        try
+        {
+            apply();
+            if (ownerSession.History != null) ownerSession.History.UpdateCurrentProgress();
+            publish();
+            return true;
+        }
+        finally { changing = false; }
     }
 
     private void Start()
@@ -235,7 +274,7 @@ public class StageManager : MonoBehaviour
         if (changing || (ownerSession != null && ownerSession.IsBusy)) return;
         StageProgressState reset = StageProgressState.Empty;
         if (configured && !TryEvaluateContext(stageData, boardManager, resourceManager, buildingHand,
-            out reset, out string error))
+            out reset, out string error, null, false, false))
         { Debug.LogWarning(error, this); return; }
         isCleared = false;
         progress = reset;

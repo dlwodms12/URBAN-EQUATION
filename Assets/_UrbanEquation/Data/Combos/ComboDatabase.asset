@@ -253,3 +253,67 @@ MonoBehaviour:
     rewards:
     - resource: 3
       amount: 3
+  - comboCode: 11101
+    comboName: "빛 공해"
+    description: "전등 좀 꺼요!"
+    buildingCodeA: 12001
+    buildingCodeB: 22001
+    rewards:
+    - resource: 0
+      amount: -1
+  - comboCode: 31101
+    comboName: "수요 부족"
+    description: "파리만 날리네요..."
+    buildingCodeA: 32001
+    buildingCodeB: 42001
+    rewards:
+    - resource: 2
+      amount: -1
+  - comboCode: 41101
+    comboName: "소음 공해"
+    description: "너무 시끄러워요!"
+    buildingCodeA: 12001
+    buildingCodeB: 42001
+    rewards:
+    - resource: 3
+      amount: -1
+  - comboCode: 51101
+    comboName: "스모그"
+    description: "숨 쉬기가 어려워요!"
+    buildingCodeA: 42001
+    buildingCodeB: 52001
+    rewards:
+    - resource: 4
+      amount: -1
+  - comboCode: 12001
+    comboName: "커피향 풍기는 동네"
+    description: "커피 한잔 한다."
+    buildingCodeA: 12001
+    buildingCodeB: 32001
+    rewards:
+    - resource: 0
+      amount: 2
+  - comboCode: 22001
+    comboName: "직장이 집합소"
+    description: "보던 사람만 보는 느낌입니다."
+    buildingCodeA: 22001
+    buildingCodeB: 32001
+    rewards:
+    - resource: 1
+      amount: 2
+  - comboCode: 32001
+    comboName: "기업 본부"
+    description: "설계와 생산의 결합입니다."
+    buildingCodeA: 22001
+    buildingCodeB: 42001
+    rewards:
+    - resource: 2
+      amount: 2
+  - comboCode: 52001
+    comboName: "관광지 카페"
+    description: "모두 손에 커피를 들고 다니네요."
+    buildingCodeA: 12001
+    buildingCodeB: 52001
+    rewards:
+    - resource: 4
+      amount: 2

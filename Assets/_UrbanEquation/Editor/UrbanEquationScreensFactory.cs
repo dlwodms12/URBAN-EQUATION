@@ -18,6 +18,7 @@ public static class UrbanEquationScreensFactory
         var scaler=root.AddComponent<CanvasScaler>(); scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution=new Vector2(1920,1080); scaler.matchWidthOrHeight=.5f; root.AddComponent<GraphicRaycaster>();
         var view=root.AddComponent<GameScreensUI>();
+        Ref(view,"uiUpdate",AssetDatabase.LoadAssetAtPath<GameUiUpdateSettings>("Assets/_UrbanEquation/Data/Presentation/GameUiUpdate.asset"));
         var background=Rect("Lobby Background",root.transform,Vector2.zero); Stretch(background); Image(background,art[0],true,false);
         Ref(view,"lobbyBackground",background);
         var lobby=Rect("Lobby",root.transform,Vector2.zero); Stretch(lobby); Ref(view,"lobby",lobby);

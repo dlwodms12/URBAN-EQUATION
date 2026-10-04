@@ -28,7 +28,13 @@ public class BoardDetailsUI : MonoBehaviour
         BuildingInstance previous = SelectedBuilding; SelectedBuilding = building;
         if (IsCurrent(previous) && previous != building && session.Combos != null
             && session.Combos.TryGetAppliedCombo(previous.Coordinate, building.Coordinate, out ComboResult result))
-        { if (replay != null) replay.ShowPersistent(result, boardCamera); return true; }
+        {
+            if (replay == null || !replay.isActiveAndEnabled) return false;
+            replay.ShowPersistent(result, boardCamera);
+            if (replay.CurrentResult == result && session.Stage != null)
+                session.Stage.TryConfirmInteraction(result, out _);
+            return true;
+        }
         return false;
     }
     public void ClearSelection()

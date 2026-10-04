@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 // Presentation only. Rewards have already been committed by GameSessionManager.
 public class ComboPopupUI : MonoBehaviour
@@ -19,8 +20,38 @@ public class ComboPopupUI : MonoBehaviour
     private Camera boardCamera;
     private float elapsed;
     private bool persistent;
+    private Image backgroundImage, headerImage;
+    private Sprite comboBackground, comboHeader, complaintBackground, complaintHeader;
+    private Vector2 comboHeaderSize;
     public ComboResult CurrentResult { get; private set; }
     public bool IsPersistent => persistent && CurrentResult != null;
+    public void ConfigureComplaintSprites(Sprite background, Sprite header)
+    {
+        if (backgroundImage == null)
+        {
+            backgroundImage = GetComponent<Image>();
+            Transform title = transform.Find("ComboHeader");
+            if (title != null) headerImage = title.GetComponent<Image>();
+            comboBackground = backgroundImage == null ? null : backgroundImage.sprite;
+            comboHeader = headerImage == null ? null : headerImage.sprite;
+            comboHeaderSize = headerImage == null ? Vector2.zero : headerImage.rectTransform.sizeDelta;
+        }
+        complaintBackground = background; complaintHeader = header;
+        if (CurrentResult != null) ApplyStyle(CurrentResult);
+    }
+    private void ApplyStyle(ComboResult result)
+    {
+        if (backgroundImage != null) backgroundImage.sprite = result.IsComplaint && complaintBackground != null ? complaintBackground : comboBackground;
+        if (headerImage != null)
+        {
+            bool complaint = result.IsComplaint && complaintHeader != null;
+            headerImage.sprite = complaint ? complaintHeader : comboHeader;
+            // The supplied stamp uses a square transparent canvas; preserve its readable width.
+            headerImage.rectTransform.sizeDelta = complaint
+                ? new Vector2(comboHeaderSize.x, comboHeaderSize.x * complaintHeader.rect.height / complaintHeader.rect.width)
+                : comboHeaderSize;
+        }
+    }
 
     public bool TryConfigureTiming(float duration, float fade)
     {
@@ -72,6 +103,7 @@ public class ComboPopupUI : MonoBehaviour
     {
         if (!isActiveAndEnabled || result == null) return;
         CurrentResult = result; elapsed = 0;
+        ApplyStyle(result);
         if (comboNameText != null) comboNameText.text = result.ComboName;
         if (descriptionText != null) descriptionText.text = result.Description;
         if (rewardsText != null) rewardsText.text = FormatRewards(result.Rewards);

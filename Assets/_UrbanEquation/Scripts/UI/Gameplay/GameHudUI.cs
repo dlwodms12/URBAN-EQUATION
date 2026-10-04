@@ -21,6 +21,7 @@ public class GameHudUI : MonoBehaviour
     [SerializeField] private ComboPopupUI automaticCombo;
     [SerializeField] private ComboPopupUI replayCombo;
     [SerializeField] private BoardDetailsUI boardDetails;
+    [SerializeField] private GameUiUpdateSettings uiUpdate;
     private GameSessionManager session;
     private SceneFlowManager flow;
     private BuildingPlacementController placement;
@@ -39,6 +40,17 @@ public class GameHudUI : MonoBehaviour
             hand.SetTooltip(tooltip);
             hand.Bind(session == null ? null : session.Hand, placement,
                 commonPrefabs == null ? null : commonPrefabs.BuildingCardPrefab, cardContent);
+        }
+        if (uiUpdate != null)
+        {
+            if (hand != null && hand.TryGetComponent<ScrollRect>(out var scroll))
+            {
+                var buttons = hand.GetComponent<BuildingHandScrollUI>();
+                if (buttons == null) buttons = hand.gameObject.AddComponent<BuildingHandScrollUI>();
+                buttons.Configure(scroll, uiUpdate.LeftScrollButton, uiUpdate.RightScrollButton, session);
+            }
+            if (automaticCombo != null) automaticCombo.ConfigureComplaintSprites(uiUpdate.ComplaintBackground, uiUpdate.ComplaintHeader);
+            if (replayCombo != null) replayCombo.ConfigureComplaintSprites(uiUpdate.ComplaintBackground, uiUpdate.ComplaintHeader);
         }
         if (automaticCombo != null) automaticCombo.Bind(session == null ? null : session.Combos, camera);
         if (boardDetails != null) boardDetails.Bind(session, placement, camera, tooltip, replayCombo);

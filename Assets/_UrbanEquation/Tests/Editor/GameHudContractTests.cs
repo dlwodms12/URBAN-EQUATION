@@ -147,7 +147,7 @@ public class GameHudContractTests
     [Test] public void TooltipDisplaysAllowedTilesAndSignedBuildingResources()
     {
         var tooltip=Tooltip(Hud());Call(tooltip,"Show",Building(13001),this,Vector2.zero);
-        Assert.That(Text(Field(tooltip,"allowedTiles")),Does.Contain("Concrete"));
+        Assert.That(Text(Field(tooltip,"allowedTiles")),Does.Contain("Grass"));
         Assert.That(Get(Field(tooltip,"gained"),"VisibleCount"),Is.EqualTo(2));Assert.That(Get(Field(tooltip,"spent"),"VisibleCount"),Is.EqualTo(2));
         var costs=(Component)Field(tooltip,"spent");Assert.That(Text(costs.transform.GetChild(0).GetChild(1).GetComponent(RuntimeText())),Is.EqualTo("-3"));
     }

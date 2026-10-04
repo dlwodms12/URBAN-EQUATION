@@ -23,7 +23,7 @@ MonoBehaviour:
   gainedResources:
   - resource: 1
     amount: 1
-  allowedTileTypes: 0100000000000000
+  allowedTileTypes: 000000000100000002000000
   produceResource: 0
   produceAmount: 0
   consumeResource: 0

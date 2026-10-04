@@ -19,6 +19,10 @@ public class ComboDefinition
     public int BuildingCodeA => buildingCodeA;
     public int BuildingCodeB => buildingCodeB;
     public IReadOnlyList<ResourceAmount> Rewards => Array.AsReadOnly(rewards);
+    public bool IsComplaint
+    {
+        get { foreach (ResourceAmount reward in rewards) if (reward.Amount < 0) return true; return false; }
+    }
 
     // Construction order is irrelevant; equal building codes are valid pairs.
     public bool Matches(int a, int b)

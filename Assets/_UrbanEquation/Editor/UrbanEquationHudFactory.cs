@@ -19,6 +19,7 @@ public static class UrbanEquationHudFactory
         scaler.referenceResolution = new Vector2(1920,1080); scaler.matchWidthOrHeight = .5f;
         root.AddComponent<GraphicRaycaster>();
         var view = root.AddComponent<GameHudUI>();
+        Ref(view,"uiUpdate",AssetDatabase.LoadAssetAtPath<GameUiUpdateSettings>("Assets/_UrbanEquation/Data/Presentation/GameUiUpdate.asset"));
         var playing = Rect("Gameplay",root.transform,Vector2.zero); Stretch(playing);
         var cityPanel = Panel("City Status",playing.transform,city,new Vector2(.015f,.83f),new Vector2(.32f,.97f));
         Label("City Title",cityPanel.transform,font,"도시 상태",new Vector2(0,1),new Vector2(0,1),new Vector2(18,-14),new Vector2(230,38),25,Color.white);

@@ -28,6 +28,8 @@ public class GameScreensUI : MonoBehaviour
     [SerializeField] private Button playButton, continueButton, exitButton, newButton, resumeButton, newCancelButton;
     [SerializeField] private Button exitYesButton, exitNoButton, selectBackButton, introOkButton, pauseYesButton, pauseNoButton;
     [SerializeField] private Button retryButton, nextButton, clearSelectButton, saveRetryButton, loadSelectButton, loadRetryButton;
+    [SerializeField] private GameUiUpdateSettings uiUpdate;
+    private Sprite stageSelectBackground;
     private readonly List<StageSelectRowUI> rows = new List<StageSelectRowUI>();
     private SceneFlowManager flow;
     private GameSceneRouter router;
@@ -38,7 +40,16 @@ public class GameScreensUI : MonoBehaviour
         && (router == null || router.IsReady);
 
     public void Bind(SceneFlowManager manager, GameSceneRouter routes)
-    { Unsubscribe(); flow=manager; router=routes; if(isActiveAndEnabled) Subscribe(); Refresh(); }
+    {
+        Unsubscribe(); flow=manager; router=routes;
+        if (uiUpdate != null)
+        {
+            if (stageSelectBackground == null && lobbyBackground != null && lobbyBackground.TryGetComponent<Image>(out var image))
+                stageSelectBackground = image.sprite;
+            if (stageSelect != null) uiUpdate.ConfigureStageScroll(stageSelect.GetComponent<ScrollRect>());
+        }
+        if(isActiveAndEnabled) Subscribe(); Refresh();
+    }
     public bool TryPlay() => flow != null && Run(flow.TryPlay);
     public bool TryContinue() => flow != null && Run(flow.TryContinue);
     public bool TryConfirmNewGame() => flow != null && Run(flow.TryConfirmNewGame);
@@ -72,6 +83,8 @@ public class GameScreensUI : MonoBehaviour
     {
         bool configured=flow!=null && flow.State!=GameFlowState.Unconfigured;
         GameFlowState state=configured?flow.State:GameFlowState.Unconfigured;
+        if (uiUpdate != null && lobbyBackground != null && lobbyBackground.TryGetComponent<Image>(out var background))
+            background.sprite = state == GameFlowState.StageSelect ? stageSelectBackground : uiUpdate.LobbyBackground;
         bool routeError=router!=null && router.LastError!=null;
         bool loading=router!=null && router.IsLoading;
         bool interactive=CanInteract;

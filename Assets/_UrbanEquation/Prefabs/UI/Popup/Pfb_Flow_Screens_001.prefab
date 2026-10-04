@@ -3876,6 +3876,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6de425effea5e4282be1cc2a922b006, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiUpdate: {fileID: 11400000, guid: ea56c6e0f6ff5ba3800007f8e834a6a0, type: 2}
   lobbyBackground: {fileID: 5140164871642744822}
   lobby: {fileID: 8905065650472945203}
   modalBlocker: {fileID: 656373982402645305}

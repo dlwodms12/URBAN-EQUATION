@@ -10,14 +10,22 @@ public sealed class StageProgressState
     public IReadOnlyList<bool> GoalStates { get; }
     public int Rank { get; }
     public bool NextStageAvailable { get; }
+    public bool ComboReviewed { get; }
+    public bool ComplaintReviewed { get; }
 
     public StageProgressState(bool isCleared, IReadOnlyList<bool> goals, int rank, bool nextStageAvailable)
+        : this(isCleared, goals, rank, nextStageAvailable, false, false) { }
+
+    public StageProgressState(bool isCleared, IReadOnlyList<bool> goals, int rank, bool nextStageAvailable,
+        bool comboReviewed, bool complaintReviewed)
     {
         if (goals == null) throw new ArgumentNullException(nameof(goals));
         if (rank < 0 || rank > 3) throw new ArgumentOutOfRangeException(nameof(rank));
         IsCleared = isCleared;
         Rank = rank;
         NextStageAvailable = nextStageAvailable;
+        ComboReviewed = comboReviewed;
+        ComplaintReviewed = complaintReviewed;
         var copy = new bool[goals.Count];
         for (int i = 0; i < copy.Length; i++) copy[i] = goals[i];
         GoalStates = Array.AsReadOnly(copy);

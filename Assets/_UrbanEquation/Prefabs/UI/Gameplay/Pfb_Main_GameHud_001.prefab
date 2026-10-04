@@ -1017,6 +1017,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc6a6d8c62d657bbada91c574d25be40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  uiUpdate: {fileID: 11400000, guid: ea56c6e0f6ff5ba3800007f8e834a6a0, type: 2}
   gameplayRoot: {fileID: 2228922832952608635}
   cityResources: {fileID: 2154560564396216121}
   stageTitle: {fileID: 9153211390382936076}
